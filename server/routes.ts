@@ -34,18 +34,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.patch("/api/health-profile", isAuthenticated, async (req, res) => {
+  app.patch("/api/health-profile", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
     try {
-      const userId = req.user!.id;
-      const updatedProfile = await storage.updateHealthProfile(userId, req.body);
-      
-      if (!updatedProfile) {
-        return res.status(404).json({ message: "Health profile not found" });
+      const userId = req.user.id;
+      const updates = { ...req.body };
+
+      // Calculate age if dateOfBirth is provided
+      if (updates.dateOfBirth) {
+        const birthDate = new Date(updates.dateOfBirth);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        // Adjust age if birthday hasn't occurred this year
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        
+        updates.age = age;
       }
-      
+
+      // Update health profile
+      const updatedProfile = await storage.updateHealthProfile(userId, updates);
       res.json(updatedProfile);
     } catch (error: any) {
-      res.status(500).json({ message: `Server error: ${error?.message || "Unknown error"}` });
+      console.error("Error updating health profile:", error);
+      res.status(500).json({ message: error.message });
     }
   });
   

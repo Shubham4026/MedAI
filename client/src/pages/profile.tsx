@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import { Activity, ArrowLeft, User, Mail, Phone, Calendar, Weight, Ruler, Droplet, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 
 interface HealthProfile {
   id: number;
@@ -27,6 +28,20 @@ export default function Profile() {
   const { toast } = useToast();
   const [profile, setProfile] = useState<HealthProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const getProfileCompletion = () => {
+    if (!profile) return { percentage: 0, completed: 0, total: 4 };
+    const requiredFields = [
+      profile.gender,
+      profile.height,
+      profile.weight,
+      profile.bloodType
+    ];
+    const completed = requiredFields.filter(field => field).length;
+    const total = requiredFields.length;
+    const percentage = Math.round((completed / total) * 100);
+    return { percentage, completed, total };
+  };
 
   useEffect(() => {
     if (!user) {
@@ -73,6 +88,8 @@ export default function Profile() {
     );
   }
 
+  const completion = getProfileCompletion();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -100,6 +117,31 @@ export default function Profile() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
+          {/* Profile Completion Status */}
+          <div className="mb-8 bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold mb-2">Health Profile</h1>
+                <p className="text-gray-600">
+                  Complete your health profile to get personalized recommendations
+                </p>
+              </div>
+              <CircularProgress percentage={completion.percentage} />
+            </div>
+            {!loading && (
+              <div className="mt-6 flex items-center gap-4">
+                <Button
+                  onClick={() => setLocation('/profile/edit')}
+                  className="bg-teal-600 hover:bg-teal-700 text-white"
+                >
+                  {completion.percentage === 100 ? 'Edit Profile' : 'Complete Your Profile'}
+                </Button>
+                <p className="text-gray-600">
+                  {completion.completed} of {completion.total} required fields completed
+                </p>
+              </div>
+            )}
+          </div>
           {/* Basic Info */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
@@ -222,7 +264,7 @@ export default function Profile() {
           </Card>
 
           {/* Emergency Contact */}
-          <Card className="p-6">
+          {/* <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Emergency Contact</h2>
             <div className="flex items-center space-x-3">
               <Phone className="h-5 w-5 text-gray-400" />
@@ -231,12 +273,13 @@ export default function Profile() {
                 <p className="font-medium">{profile?.emergencyContact || 'Not provided'}</p>
               </div>
             </div>
-          </Card>
+          </Card> */}
 
           {/* Edit Button */}
           <div className="flex justify-end">
             <Button 
-              className="bg-teal-600 hover:bg-teal-700"
+              variant="outline"
+              className="border-teal-600 text-teal-600 hover:bg-teal-50"
               onClick={() => setLocation('/profile/edit')}
             >
               Edit Profile

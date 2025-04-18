@@ -31,11 +31,12 @@ async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "mediaisecret2025",
-    resave: false,
+    resave: true,
     saveUninitialized: false,
+    rolling: true, // Refresh session with each request
     store: storage.sessionStore,
     cookie: {
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax"
@@ -145,6 +146,14 @@ export function setupAuth(app: Express) {
       if (err) return next(err);
       res.json({ message: "Logged out successfully" });
     });
+  });
+
+  // Middleware to refresh session
+  app.use((req, res, next) => {
+    if (req.isAuthenticated()) {
+      req.session.touch(); // Refresh session on each authenticated request
+    }
+    next();
   });
 
   app.get("/api/user", (req, res) => {

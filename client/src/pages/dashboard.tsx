@@ -36,9 +36,38 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { useEffect } from "react";
-
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
+import { useProfileCompletion } from "@/hooks/use-profile-completion";
+
+function ProfileCompletionBanner() {
+  const { completion, loading } = useProfileCompletion();
+  const [, setLocation] = useLocation();
+
+  if (loading || completion.percentage === 100) return null;
+
+  return (
+    <div className="bg-gradient-to-r from-teal-50 to-teal-100 border-b border-teal-200">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Activity className="h-5 w-5 text-teal-600" />
+            <p className="text-teal-800">
+              Complete your health profile ({completion.completed} of {completion.total} fields) to get personalized recommendations
+            </p>
+          </div>
+          <Button
+            onClick={() => setLocation('/profile')}
+            className="bg-teal-600 hover:bg-teal-700 text-white"
+            size="sm"
+          >
+            Complete Profile
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -109,6 +138,9 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
+
+      {/* Profile Completion Banner */}
+      <ProfileCompletionBanner />
 
       {/* Emergency Floating Action Button */}
       <Dialog>
