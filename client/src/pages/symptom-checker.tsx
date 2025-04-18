@@ -6,7 +6,9 @@ import { ChatContainer } from '@/components/chat/chat-container';
 import { useConversations } from '@/lib/hooks';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from "@/hooks/use-auth";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
+import { Activity, ArrowLeft, Brain } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   const { user } = useAuth();
@@ -57,18 +59,43 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <Header 
-        onNewChat={handleNewChat} 
-        onMenuToggle={() => setIsMobileMenuOpen(true)} 
-      />
+      <header className="bg-white border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hover:bg-gray-100"
+                onClick={() => setLocation('/dashboard')}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex items-center space-x-2">
+                <Brain className="h-7 w-7 text-teal-600" />
+                <span className="text-xl font-bold text-teal-600">Symptom Checker</span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button 
+                onClick={handleNewChat}
+                variant="default" 
+                className="bg-teal-600 hover:bg-teal-700"
+              >
+                New Assessment
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Main Content */}
       <main className="flex-grow flex">
         {/* Sidebar (desktop) */}
         <Sidebar 
-          conversations={conversations}
+          conversations={conversations as any}
           isLoading={isLoading}
           activeConversationId={activeConversationId}
           onSelectConversation={handleSelectConversation}
@@ -82,7 +109,7 @@ export default function Home() {
         <MobileMenu 
           isOpen={isMobileMenuOpen}
           onClose={() => setIsMobileMenuOpen(false)}
-          conversations={conversations}
+          conversations={conversations as any}
           isLoading={isLoading}
           activeConversationId={activeConversationId}
           onSelectConversation={handleSelectConversation}
