@@ -2,8 +2,21 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Activity, Brain, Heart, MessageSquare, TrendingUp, User } from "lucide-react";
 import { Link } from "wouter";
+import { useEffect } from "react";
+
+import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!user) {
+      setLocation("/auth?mode=login");
+    }
+  }, [user, setLocation]);
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b">

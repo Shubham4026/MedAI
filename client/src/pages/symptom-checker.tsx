@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { MobileMenu } from '@/components/layout/mobile-menu';
 import { ChatContainer } from '@/components/chat/chat-container';
 import { useConversations } from '@/lib/hooks';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 
 export default function Home() {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!user) {
+      setLocation("/auth?mode=login");
+    }
+  }, [user, setLocation]);
+
   const [activeConversationId, setActiveConversationId] = useState<number | undefined>(undefined);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { conversations, isLoading, createConversation } = useConversations();

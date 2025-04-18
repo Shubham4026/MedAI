@@ -2,7 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState, useEffect } from "react";
-import { Redirect } from "wouter";
+import { useLocation, useSearch } from "wouter";
+import { useRedirect } from "@/contexts/redirect-context";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +50,19 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<string>("login");
   const { user, loginMutation, registerMutation } = useAuth();
+  const [, setLocation] = useLocation();
+  const search = useSearch();
+
+  // Set initial auth mode from URL
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const mode = params.get("mode");
+    if (mode === "signup") {
+      setActiveTab("register");
+    } else if (mode === "login") {
+      setActiveTab("login");
+    }
+  }, [search]);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -78,10 +92,16 @@ export default function AuthPage() {
     registerMutation.mutate(registerData);
   }
 
-  // Redirect if already logged in
-  if (user) {
-    return <Redirect to="/" />;
-  }
+  // Handle redirects
+  const { redirectPath, setRedirectPath } = useRedirect();
+  
+  useEffect(() => {
+    if (user) {
+      setLocation(redirectPath || "/dashboard");
+      // Clear the redirect path after use
+      setRedirectPath(null);
+    }
+  }, [user, setLocation, redirectPath, setRedirectPath]);
 
   const isAuthLoading = loginMutation.isPending || registerMutation.isPending;
 
@@ -98,9 +118,12 @@ export default function AuthPage() {
           </div>
 
           <Tabs 
-            defaultValue="login" 
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={(value) => {
+              setActiveTab(value);
+              const mode = value === "register" ? "signup" : "login";
+              setLocation(`/auth?mode=${mode}`, { replace: true });
+            }}
             className="w-full mt-8"
           >
             <TabsList className="grid w-full grid-cols-2">

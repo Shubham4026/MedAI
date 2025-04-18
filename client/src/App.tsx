@@ -8,19 +8,51 @@ import AuthPage from "@/pages/auth-page";
 import LandingPage from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import { useEffect } from "react";
-import { AuthProvider } from "@/hooks/use-auth";
-import { ProtectedRoute } from "@/lib/protected-route";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { Route as WouterRoute, Redirect } from "wouter";
+import { RedirectProvider, useRedirect } from "@/contexts/redirect-context";
+
+interface ProtectedRouteProps {
+  component: React.ComponentType<any>;
+  path: string;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component, path }) => {
+  const { user } = useAuth();
+  const { setRedirectPath } = useRedirect();
+  
+  if (!user) {
+    setRedirectPath(path);
+    return <Redirect to="/auth?mode=login" />;
+  }
+
+  return <WouterRoute path={path} component={Component} />;
+};
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={LandingPage} />
+      <WouterRoute path="/" component={LandingPage} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/symptom-checker" component={SymptomChecker} />
-      <Route path="/auth" component={AuthPage} />
+      <WouterRoute path="/auth" component={AuthPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
+  );
+}
+
+function AppContent() {
+  // Add metadata to the document head
+  useEffect(() => {
+    document.title = "MediAI - AI-Powered Health Assistant";
+  }, []);
+
+  return (
+    <>
+      <Router />
+      <Toaster />
+    </>
   );
 }
 
@@ -43,8 +75,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router />
-        <Toaster />
+        <RedirectProvider>
+          <AppContent />
+        </RedirectProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

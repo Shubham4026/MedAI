@@ -1,8 +1,10 @@
 import { Link } from "wouter";
 import { ArrowRight, Activity, Heart, Brain, Shield, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 export default function LandingPage() {
+  const [, setLocation] = useLocation();
   return (
     <div className="flex flex-col min-h-screen">
       <header className="border-b">
@@ -23,12 +25,17 @@ export default function LandingPage() {
             </Link>
           </nav>
           <div className="flex gap-4">
-            <Link href="/auth">
-              <Button variant="outline">Log In</Button>
-            </Link>
-            <Link href="/auth">
-              <Button>Sign Up</Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              onClick={() => setLocation("/auth?mode=login")}
+            >
+              Log In
+            </Button>
+            <Button 
+              onClick={() => setLocation("/auth?mode=signup")}
+            >
+              Sign Up
+            </Button>
           </div>
         </div>
       </header>
@@ -47,11 +54,13 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href="/auth">
-                    <Button size="lg" className="bg-teal-600 hover:bg-teal-700">
-                      Get Started <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <Button 
+                    size="lg" 
+                    className="bg-teal-600 hover:bg-teal-700"
+                    onClick={() => setLocation("/auth?mode=signup")}
+                  >
+                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                   <Link href="/#features">
                     <Button size="lg" variant="outline">
                       Learn More
