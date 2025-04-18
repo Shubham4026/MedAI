@@ -106,12 +106,12 @@ export default function AuthPage() {
   const isAuthLoading = loginMutation.isPending || registerMutation.isPending;
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gradient-to-br from-teal-50 to-teal-100/50">
       {/* Left side - Auth forms */}
       <div className="flex flex-col items-center justify-center p-6 md:w-1/2">
         <div className="w-full max-w-md mx-auto">
           <div className="space-y-4">
-            <h1 className="text-3xl font-bold text-center">MediAI</h1>
+            <h1 className="text-3xl font-bold text-center text-teal-600">MediAI</h1>
             <p className="text-center text-muted-foreground">
               Your personal health assistant powered by AI
             </p>
@@ -179,7 +179,7 @@ export default function AuthPage() {
                       />
                       <Button 
                         type="submit" 
-                        className="w-full" 
+                        className="w-full bg-teal-600 hover:bg-teal-700" 
                         disabled={isAuthLoading}
                       >
                         {isAuthLoading && loginMutation.isPending ? (
@@ -307,7 +307,7 @@ export default function AuthPage() {
                       />
                       <Button 
                         type="submit" 
-                        className="w-full" 
+                        className="w-full bg-teal-600 hover:bg-teal-700" 
                         disabled={isAuthLoading}
                       >
                         {isAuthLoading && registerMutation.isPending ? (
@@ -337,27 +337,27 @@ export default function AuthPage() {
       </div>
 
       {/* Right side - Info area */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-primary/20 to-primary/5 p-12 items-center justify-center">
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-teal-100 to-teal-50 p-12 items-center justify-center">
         <div className="max-w-lg">
           <h2 className="text-4xl font-bold mb-6">Your Health Journey, <br />AI-Enhanced</h2>
           <p className="text-lg mb-6">
             MediAI combines advanced AI with personalized health tracking to give you better insights about your wellbeing.
           </p>
-          <ul className="space-y-4">
+          <ul className="space-y-8">
             <li className="flex items-start">
-              <div className="mr-4 bg-primary/10 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+              <div className="mr-6 bg-teal-100 p-4 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600">
                   <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-lg">AI Symptom Analysis</h3>
-                <p className="text-muted-foreground">Get instant insights about your symptoms from our advanced AI models.</p>
+                <h3 className="font-semibold text-xl mb-1">AI Symptom Analysis</h3>
+                <p className="text-muted-foreground text-lg">Get instant insights about your symptoms from our advanced AI models.</p>
               </div>
             </li>
             <li className="flex items-start">
-              <div className="mr-4 bg-primary/10 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+              <div className="mr-6 bg-teal-100 p-4 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -365,13 +365,13 @@ export default function AuthPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-lg">Personal Health Profile</h3>
-                <p className="text-muted-foreground">Create your health profile for better, more personalized care suggestions.</p>
+                <h3 className="font-semibold text-xl mb-1">Personal Health Profile</h3>
+                <p className="text-muted-foreground text-lg">Create your health profile for better, more personalized care suggestions.</p>
               </div>
             </li>
             <li className="flex items-start">
-              <div className="mr-4 bg-primary/10 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+              <div className="mr-6 bg-teal-100 p-4 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600">
                   <path d="M2 9h18v12H2z" />
                   <path d="M4 4h16v5H4z" />
                   <path d="M12 4v9" />
@@ -379,8 +379,8 @@ export default function AuthPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-lg">Health Tracking Dashboard</h3>
-                <p className="text-muted-foreground">Monitor your health metrics and see progress over time.</p>
+                <h3 className="font-semibold text-xl mb-1">Health Tracking Dashboard</h3>
+                <p className="text-muted-foreground text-lg">Monitor your health metrics and see progress over time.</p>
               </div>
             </li>
           </ul>
