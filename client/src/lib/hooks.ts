@@ -11,11 +11,12 @@ export function useConversations() {
 
   // Fetch all conversations
   const { data: conversations, isLoading } = useQuery<Conversation[]>({
-    queryKey: ['/api/conversations'],
-    onError: (error) => {
+    queryKey: ['/api/conversations'] as const,
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Error fetching conversations",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     }
@@ -30,10 +31,11 @@ export function useConversations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Error creating conversation",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     }
@@ -57,12 +59,13 @@ export function useConversation(conversationId?: number) {
     data: messages, 
     isLoading: isLoadingMessages 
   } = useQuery<Message[]>({
-    queryKey: ['/api/conversations', conversationId, 'messages'],
+    queryKey: ['/api/conversations', conversationId, 'messages'] as const,
     enabled: !!conversationId,
-    onError: (error) => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Error fetching messages",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     }
@@ -73,12 +76,13 @@ export function useConversation(conversationId?: number) {
     data: analyses, 
     isLoading: isLoadingAnalyses 
   } = useQuery<Analysis[]>({
-    queryKey: ['/api/conversations', conversationId, 'analyses'],
+    queryKey: ['/api/conversations', conversationId, 'analyses'] as const,
     enabled: !!conversationId,
-    onError: (error) => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Error fetching analyses",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     }
@@ -86,7 +90,7 @@ export function useConversation(conversationId?: number) {
 
   // Create a new message
   const sendMessageMutation = useMutation({
-    mutationFn: async (content: string) => {
+    mutationFn: async ({ content, conversationId }: { content: string, conversationId: number }) => {
       if (!conversationId) throw new Error("No conversation selected");
       
       const response = await apiRequest("POST", `/api/conversations/${conversationId}/messages`, {
@@ -100,19 +104,20 @@ export function useConversation(conversationId?: number) {
       queryClient.invalidateQueries({ queryKey: ['/api/conversations', conversationId, 'messages'] });
       queryClient.invalidateQueries({ queryKey: ['/api/conversations', conversationId, 'analyses'] });
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Error sending message",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     }
   });
 
   // Combine messages with their analyses
-  const messagesWithAnalyses = messages?.map(message => {
+  const messagesWithAnalyses = (messages as Message[] | undefined)?.map((message: Message) => {
     if (message.role === "assistant") {
-      const analysis = analyses?.find(a => a.messageId === message.id);
+      const analysis = (analyses as Analysis[] | undefined)?.find((a: Analysis) => a.urgencyLevel);
       if (analysis) {
         return { ...message, analysis };
       }
@@ -121,9 +126,9 @@ export function useConversation(conversationId?: number) {
   });
 
   return {
-    messages: messagesWithAnalyses,
+    messages: messagesWithAnalyses || [],
     isLoading: isLoadingMessages || isLoadingAnalyses,
-    sendMessage: sendMessageMutation.mutate,
-    isSending: sendMessageMutation.isPending,
+    sendMessage: (content: string) => sendMessageMutation.mutate({ content, conversationId: conversationId! }),
+    isPending: sendMessageMutation.isPending,
   };
 }
