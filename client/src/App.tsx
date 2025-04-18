@@ -7,6 +7,7 @@ import SymptomChecker from "@/pages/symptom-checker";
 import AuthPage from "@/pages/auth-page";
 import LandingPage from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
+import Profile from "@/pages/profile";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { Route as WouterRoute, Redirect } from "wouter";
@@ -35,6 +36,7 @@ function Router() {
       <WouterRoute path="/" component={LandingPage} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/symptom-checker" component={SymptomChecker} />
+      <ProtectedRoute path="/profile" component={Profile} />
       <WouterRoute path="/auth" component={AuthPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
