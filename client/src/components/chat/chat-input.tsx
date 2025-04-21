@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { VoiceModal } from './voice-modal';
 import { Button } from "@/components/ui/button";
 import { Mic, Send } from "lucide-react";
 
@@ -33,17 +34,33 @@ export function ChatInput({ onSend, isDisabled = false }: ChatInputProps) {
     }
   };
 
+  // Speech-to-text modal state
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
+  const [listening, setListening] = useState(false);
+
   const handleVoice = () => {
-    // This would integrate with speech recognition in a real application
-    // For now just show an alert about the feature
-    alert("Voice input would be activated here. This feature would use the Web Speech API to capture voice input.");
+    setVoiceModalOpen(true);
   };
 
+  const handleVoiceTranscript = (transcript: string) => {
+    setMessage((prev) => (prev ? prev + ' ' + transcript : transcript));
+  };
+
+
   return (
-    <div className="border-t border-gray-200 px-4 py-4 sm:px-6">
-      <form onSubmit={handleSend} className="flex space-x-3">
-        <div className="min-w-0 flex-1">
-          <div className="relative rounded-md shadow-sm">
+    <>
+      {voiceModalOpen && (
+        <VoiceModal
+          open={voiceModalOpen}
+          onClose={() => setVoiceModalOpen(false)}
+          onTranscript={handleVoiceTranscript}
+          setListening={setListening}
+        />
+      )}
+      <div className="border-t border-gray-200 px-4 py-4 sm:px-6">
+        <form onSubmit={handleSend} className="flex space-x-3">
+          <div className="min-w-0 flex-1">
+            <div className="relative rounded-md shadow-sm">
             <textarea
               ref={textareaRef}
               rows={1}
@@ -56,11 +73,14 @@ export function ChatInput({ onSend, isDisabled = false }: ChatInputProps) {
             <div className="absolute inset-y-0 right-0 flex items-center pr-3">
               <button
                 type="button"
+                className="p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 onClick={handleVoice}
-                className="text-gray-400 hover:text-gray-500"
                 disabled={isDisabled}
+                aria-label="Start voice input"
               >
-                <Mic className="h-5 w-5" />
+                <Mic className={
+                  `w-5 h-5 ${listening ? 'text-red-500 animate-pulse' : 'text-gray-400'}`
+                } />
               </button>
             </div>
           </div>
@@ -73,5 +93,6 @@ export function ChatInput({ onSend, isDisabled = false }: ChatInputProps) {
         For emergencies, please call your local emergency number (e.g., 911 in the US) immediately.
       </p>
     </div>
+    </>
   );
 }
