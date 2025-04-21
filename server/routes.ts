@@ -95,6 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new conversation - requires authentication
   app.post("/api/conversations", isAuthenticated, async (req, res) => {
     try {
+      console.log("conversations", req.body);
       const data = insertConversationSchema.parse(req.body);
       const conversation = await storage.createConversation(data);
       res.json(conversation);

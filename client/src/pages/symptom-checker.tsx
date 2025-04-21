@@ -27,15 +27,22 @@ export default function Home() {
   const { toast } = useToast();
 
   const handleNewChat = () => {
-    // Create a new conversation with a default title
-    // In a real app, you might prompt for a title or use the first message as the title
-    createConversation('New Symptom Assessment', {
+    if (!user?.id) {
+      toast({
+        title: "User not found",
+        description: "You must be logged in to start a new conversation.",
+        variant: "destructive",
+      });
+      return;
+    }
+    createConversation({ title: 'New Symptom Assessment', userId: user.id }, {
       onSuccess: (data) => {
         setActiveConversationId(data.id);
         setIsMobileMenuOpen(false);
       }
     });
   };
+
 
   const handleSelectConversation = (id: number) => {
     setActiveConversationId(id);
