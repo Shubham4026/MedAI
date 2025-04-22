@@ -1,10 +1,22 @@
+import { useEffect } from "react";
 import { Link } from "wouter";
-import { ArrowRight, Activity, Heart, Brain, Shield, CheckCircle } from "lucide-react";
+import Features from "@/components/features";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import Testimonial from "@/components/testimonial";
+import { Activity, ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function LandingPage() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      setLocation("/dashboard");
+    }
+  }, [setLocation, user]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="border-b">
@@ -77,66 +89,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32">
-          <div className="px-4 md:px-6 max-w-7xl mx-auto w-full">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-teal-100 px-3 py-1 text-sm text-teal-700">Features</div>
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                  Everything you need for better health
-                </h2>
-                <p className="max-w-[700px] text-gray-500 md:text-xl">
-                  MediAI combines AI technology with medical expertise to provide you with a comprehensive health
-                  monitoring solution.
-                </p>
-              </div>
-            </div>
-            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-                <Heart className="h-12 w-12 text-teal-600" />
-                <h3 className="text-xl font-bold">Heart Health</h3>
-                <p className="text-center text-gray-500">
-                  Monitor your heart rate, blood pressure, and other cardiovascular metrics.
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-                <Activity className="h-12 w-12 text-teal-600" />
-                <h3 className="text-xl font-bold">Activity Tracking</h3>
-                <p className="text-center text-gray-500">
-                  Track your daily steps, workouts, and overall physical activity.
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-                <Brain className="h-12 w-12 text-teal-600" />
-                <h3 className="text-xl font-bold">Mental Wellness</h3>
-                <p className="text-center text-gray-500">
-                  Assess your stress levels, sleep quality, and mental health status.
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-                <Shield className="h-12 w-12 text-teal-600" />
-                <h3 className="text-xl font-bold">Preventive Care</h3>
-                <p className="text-center text-gray-500">
-                  Get personalized recommendations for preventive health measures.
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-                <CheckCircle className="h-12 w-12 text-teal-600" />
-                <h3 className="text-xl font-bold">Health Goals</h3>
-                <p className="text-center text-gray-500">
-                  Set and track your health and fitness goals with AI assistance.
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-                <Activity className="h-12 w-12 text-teal-600" />
-                <h3 className="text-xl font-bold">AI Insights</h3>
-                <p className="text-center text-gray-500">
-                  Receive AI-powered insights and recommendations based on your health data.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        <Features />
+        <Testimonial />
 
         <section className="w-full py-12 md:py-24 lg:py-32 bg-teal-600 text-white">
           <div className="px-4 md:px-6 max-w-7xl mx-auto w-full">

@@ -7,13 +7,15 @@ import { useConversation } from '@/lib/hooks';
 import { Message } from '@/lib/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ChatContainerProps {
   conversationId?: number;
 }
 
 export function ChatContainer({ conversationId }: ChatContainerProps) {
-  const { messages, isLoading, sendMessage, isSending } = useConversation(conversationId);
+  const { messages, isLoading, sendMessage, isPending } = useConversation(conversationId);
+  const [pendingUserMessage, setPendingUserMessage] = React.useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages change
@@ -21,11 +23,46 @@ export function ChatContainer({ conversationId }: ChatContainerProps) {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages, isSending]);
+  }, [messages, isPending]);
 
-  const handleSendMessage = (content: string) => {
+  // Track if title has been updated for this conversation
+  const titleUpdatedRef = React.useRef<Record<number, boolean>>({});
+
+  const queryClient = useQueryClient();
+
+  const handleSendMessage = async (content: string) => {
+    setPendingUserMessage(content);
     sendMessage(content);
+
+    // Only update title for first user message in this conversation
+    if (
+      conversationId &&
+      !titleUpdatedRef.current[conversationId] &&
+      messages?.filter((m) => m.role === "user").length === 0
+    ) {
+      // Summarize (truncate) the message for the title
+      const summary = content.length > 48 ? content.slice(0, 48) + "..." : content;
+      try {
+        await fetch(`/api/conversations/${conversationId}/title`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: summary })
+        });
+        titleUpdatedRef.current[conversationId] = true;
+        // Invalidate the conversations query so the sidebar updates
+        queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
+      } catch (e) {
+        // Optionally handle error
+        // console.error('Failed to update conversation title', e);
+      }
+    }
   };
+
+  // Clear pending message when not sending
+  React.useEffect(() => {
+    if (!isPending) setPendingUserMessage(null);
+  }, [isPending]);
+
 
   return (
     <div className="flex-grow flex flex-col bg-white">
@@ -86,13 +123,23 @@ export function ChatContainer({ conversationId }: ChatContainerProps) {
             }
           })}
 
+          {/* Optimistically show the user message while sending */}
+          {pendingUserMessage && (
+            <MessageBubble
+              key="pending-user"
+              role="user"
+              content={pendingUserMessage}
+              className="opacity-70 animate-pulse"
+            />
+          )}
+
           {/* Loading state */}
-          <ThinkingBubble isVisible={isSending} />
+          <ThinkingBubble isVisible={isPending} />
         </div>
       </div>
 
       {/* Chat Input */}
-      <ChatInput onSend={handleSendMessage} isDisabled={isSending} />
+      <ChatInput onSend={handleSendMessage} isDisabled={isPending} />
     </div>
   );
 }

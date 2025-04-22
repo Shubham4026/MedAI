@@ -1,18 +1,19 @@
 import { Switch, Route } from "wouter";
+import { useEffect, useState, Suspense, lazy } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import NotFound from "@/pages/not-found";
-import SymptomChecker from "@/pages/symptom-checker";
-import AuthPage from "@/pages/auth-page";
-import LandingPage from "@/pages/landing";
-import Dashboard from "@/pages/dashboard";
-import Profile from "@/pages/profile";
-import ProfileEdit from "@/pages/profile-edit";
-import Pricing from "@/pages/pricing";
-import Contact from "@/pages/contact";
-import FAQ from "@/pages/faq";
-import { useEffect } from "react";
+const NotFound = lazy(() => import("@/pages/not-found"));
+const SymptomChecker = lazy(() => import("@/pages/symptom-checker"));
+const AuthPage = lazy(() => import("@/pages/auth-page"));
+const LandingPage = lazy(() => import("@/pages/landing"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Profile = lazy(() => import("@/pages/profile"));
+const ProfileEdit = lazy(() => import("@/pages/profile-edit"));
+const Pricing = lazy(() => import("@/pages/pricing"));
+const Contact = lazy(() => import("@/pages/contact"));
+const FAQ = lazy(() => import("@/pages/faq"));
+import { HeartPulse } from "lucide-react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { Route as WouterRoute, Redirect } from "wouter";
 import { RedirectProvider, useRedirect } from "@/contexts/redirect-context";
@@ -36,19 +37,41 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component, p
 
 function Router() {
   return (
-    <Switch>
-      <WouterRoute path="/" component={LandingPage} />
-      <ProtectedRoute path="/dashboard" component={Dashboard} />
-      <ProtectedRoute path="/symptom-checker" component={SymptomChecker} />
-      <ProtectedRoute path="/profile" component={Profile} />
-      <ProtectedRoute path="/profile/edit" component={ProfileEdit} />
-      <WouterRoute path="/pricing" component={Pricing} />
-      <WouterRoute path="/contact" component={Contact} />
-      <WouterRoute path="/faq" component={FAQ} />
-      <WouterRoute path="/auth" component={AuthPage} />
-      {/* Fallback to 404 */}
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense
+      fallback={
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
+          <HeartPulse className="h-16 w-16 text-red-500 animate-heartbeat" />
+          <span className="mt-4 text-red-500 font-semibold text-lg">Loading...</span>
+          <style>{`
+            @keyframes heartbeat {
+              0%, 100% { transform: scale(1); filter: brightness(1); }
+              10% { transform: scale(1.12); filter: brightness(1.2); }
+              20% { transform: scale(0.95); filter: brightness(0.9); }
+              30% { transform: scale(1.08); filter: brightness(1.15); }
+              40% { transform: scale(1); filter: brightness(1); }
+            }
+            .animate-heartbeat {
+              animation: heartbeat 1.1s infinite;
+              transform-origin: center;
+            }
+          `}</style>
+        </div>
+      }
+    >
+      <Switch>
+        <WouterRoute path="/" component={LandingPage} />
+        <ProtectedRoute path="/dashboard" component={Dashboard} />
+        <ProtectedRoute path="/symptom-checker" component={SymptomChecker} />
+        <ProtectedRoute path="/profile" component={Profile} />
+        <ProtectedRoute path="/profile/edit" component={ProfileEdit} />
+        <WouterRoute path="/pricing" component={Pricing} />
+        <WouterRoute path="/contact" component={Contact} />
+        <WouterRoute path="/faq" component={FAQ} />
+        <WouterRoute path="/auth" component={AuthPage} />
+        {/* Fallback to 404 */}
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
@@ -57,6 +80,35 @@ function AppContent() {
   useEffect(() => {
     document.title = "MediAI - AI-Powered Health Assistant";
   }, []);
+
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    // Simulate minimal delay for loader (can be removed or adjusted)
+    const timeout = setTimeout(() => setLoading(false), 400);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
+        <HeartPulse className="h-16 w-16 text-red-500 animate-heartbeat" />
+        <span className="mt-4 text-red-500 font-semibold text-lg">Loading...</span>
+        <style>{`
+          @keyframes heartbeat {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            10% { transform: scale(1.12); filter: brightness(1.2); }
+            20% { transform: scale(0.95); filter: brightness(0.9); }
+            30% { transform: scale(1.08); filter: brightness(1.15); }
+            40% { transform: scale(1); filter: brightness(1); }
+          }
+          .animate-heartbeat {
+            animation: heartbeat 1.1s infinite;
+            transform-origin: center;
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <>

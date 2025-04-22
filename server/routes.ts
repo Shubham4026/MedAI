@@ -8,14 +8,17 @@ import { setupAuth } from "./auth";
 
 // Middleware to check if the user is authenticated
 function isAuthenticated(req: Request, res: Response, next: NextFunction) {
+  console.log("[AUTH] isAuthenticated called", req.method, req.originalUrl);
   if (req.isAuthenticated()) {
     return next();
   }
+  console.log("[AUTH] Not authenticated");
   return res.status(401).json({ message: "Authentication required" });
 }
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  console.log("[ROUTES] registerRoutes called");
   // Setup authentication
   setupAuth(app);
   
@@ -124,6 +127,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // API routes for conversations
   
+  // Update conversation title - requires authentication
+  app.patch("/api/conversations/:id/title", isAuthenticated, async (req, res) => {
+    console.log("[PATCH] /api/conversations/:id/title called", { params: req.params, body: req.body });
+    try {
+      const id = parseInt(req.params.id);
+      const { title } = req.body;
+      if (!title || typeof title !== "string" || !title.trim()) {
+        console.log("[PATCH] Invalid title", { title });
+        return res.status(400).json({ message: "Title is required" });
+      }
+      const updated = await storage.updateConversationTitle(id, title.trim());
+      if (!updated) {
+        console.log("[PATCH] Conversation not found", { id });
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      console.log("[PATCH] Title updated", { id, title: title.trim() });
+      res.json({ success: true, id, title: title.trim() });
+    } catch (error: any) {
+      console.error("[PATCH] Failed to update title", error);
+      res.status(500).json({ message: error.message || "Failed to update title" });
+    }
+  });
+
   // Create a new conversation - requires authentication
   app.post("/api/conversations", isAuthenticated, async (req, res) => {
     try {
@@ -255,6 +281,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       res.status(500).json({ message: `Server error: ${error?.message || "Unknown error"}` });
     }
+  });
+
+  // Catch-all middleware for unmatched requests
+  app.use((req, res, next) => {
+    console.log("[CATCH-ALL] No route matched for", req.method, req.originalUrl);
+    next();
   });
 
   const httpServer = createServer(app);

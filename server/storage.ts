@@ -30,6 +30,7 @@ export interface IStorage {
   createHealthMetric(metric: InsertHealthMetric): Promise<HealthMetric>;
   
   // Conversation methods
+  updateConversationTitle(id: number, title: string): Promise<boolean>;
   getConversations(userId?: number): Promise<Conversation[]>;
   getConversation(id: number): Promise<Conversation | undefined>;
   createConversation(conversation: InsertConversation): Promise<Conversation>;
@@ -114,6 +115,16 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Conversation methods
+  async updateConversationTitle(id: number, title: string): Promise<boolean> {
+    console.log("[UPDATE] /api/conversations/:id/title called", { id, title });
+    const [updated] = await db
+      .update(conversations)
+      .set({ title })
+      .where(eq(conversations.id, id))
+      .returning();
+    return !!updated;
+  }
+
   async getConversations(userId?: number): Promise<Conversation[]> {
     let query = db.select().from(conversations);
     

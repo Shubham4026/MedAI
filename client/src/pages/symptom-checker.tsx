@@ -26,6 +26,23 @@ export default function Home() {
   const { conversations, isLoading, createConversation } = useConversations();
   const { toast } = useToast();
 
+  // Sort conversations by last updated (descending)
+  const sortedConversations = React.useMemo(() => {
+    if (!conversations) return [];
+    return [...conversations].sort((a, b) => {
+      const aTime = new Date(a.createdAt || 0).getTime();
+      const bTime = new Date(b.createdAt || 0).getTime();
+      return bTime - aTime;
+    });
+  }, [conversations]);
+
+  // Select the first conversation by default when loaded
+  useEffect(() => {
+    if (!activeConversationId && sortedConversations && sortedConversations.length > 0) {
+      setActiveConversationId(sortedConversations[0].id);
+    }
+  }, [sortedConversations, activeConversationId]);
+
   const handleNewChat = () => {
     if (!user?.id) {
       toast({
@@ -102,7 +119,7 @@ export default function Home() {
       <main className="flex-grow flex">
         {/* Sidebar (desktop) */}
         <Sidebar 
-          conversations={conversations as any}
+          conversations={sortedConversations as any}
           isLoading={isLoading}
           activeConversationId={activeConversationId}
           onSelectConversation={handleSelectConversation}
@@ -116,7 +133,7 @@ export default function Home() {
         <MobileMenu 
           isOpen={isMobileMenuOpen}
           onClose={() => setIsMobileMenuOpen(false)}
-          conversations={conversations as any}
+          conversations={sortedConversations as any}
           isLoading={isLoading}
           activeConversationId={activeConversationId}
           onSelectConversation={handleSelectConversation}
