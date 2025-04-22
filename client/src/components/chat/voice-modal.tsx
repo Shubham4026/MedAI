@@ -12,6 +12,10 @@ interface VoiceModalProps {
 }
 
 export const VoiceModal: React.FC<VoiceModalProps> = ({ open, onClose, onTranscript, setListening }) => {
+  const [corrected, setCorrected] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
   const {
     transcript,
     listening,
@@ -39,10 +43,30 @@ export const VoiceModal: React.FC<VoiceModalProps> = ({ open, onClose, onTranscr
     // eslint-disable-next-line
   }, [open]);
 
+  const handleAutocorrect = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/autocorrect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: transcript })
+      });
+      if (!res.ok) throw new Error("Failed to autocorrect");
+      const data = await res.json();
+      setCorrected(data.corrected);
+    } catch (err: any) {
+      setError(err.message || "Autocorrect failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUseTranscript = () => {
-    onTranscript(transcript);
+    onTranscript(corrected ?? transcript);
     onClose();
   };
+
 
   if (!browserSupportsSpeechRecognition) {
     return (
@@ -76,21 +100,36 @@ export const VoiceModal: React.FC<VoiceModalProps> = ({ open, onClose, onTranscr
             </div>
           </div>
           <div className="bg-gray-100 rounded p-4 mb-4 w-full min-h-[60px] text-gray-800">
-            {transcript || <span className="text-gray-400">Say something...</span>}
+            {loading ? (
+              <span className="text-blue-500">Autocorrecting...</span>
+            ) : corrected ? (
+              <span className="font-medium">{corrected}</span>
+            ) : (
+              transcript || <span className="text-gray-400">Say something...</span>
+            )}
           </div>
+          {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
           <div className="flex gap-2">
             <Button
               type="button"
               variant="secondary"
               onClick={resetTranscript}
-              disabled={!transcript}
+              disabled={!transcript || loading}
             >
               Reset
             </Button>
             <Button
               type="button"
+              variant="secondary"
+              onClick={handleAutocorrect}
+              disabled={!transcript || loading}
+            >
+              Autocorrect
+            </Button>
+            <Button
+              type="button"
               onClick={handleUseTranscript}
-              disabled={!transcript}
+              disabled={loading || (!transcript && !corrected)}
             >
               Use This
             </Button>

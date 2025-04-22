@@ -17,8 +17,8 @@ export default function LandingPage() {
             <Link href="/#features" className="text-sm font-medium hover:underline underline-offset-4">
               Features
             </Link>
-            <Link href="/#testimonials" className="text-sm font-medium hover:underline underline-offset-4">
-              Testimonials
+            <Link href="/pricing" className="text-sm font-medium hover:underline underline-offset-4">
+              Pricing
             </Link>
             <Link href="/contact" className="text-sm font-medium hover:underline underline-offset-4">
               Contact
@@ -138,61 +138,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 bg-gray-50">
-          <div className="px-4 md:px-6 max-w-7xl mx-auto w-full">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-teal-100 px-3 py-1 text-sm text-teal-700">Testimonials</div>
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">What our users say</h2>
-                <p className="max-w-[700px] text-gray-500 md:text-xl">
-                  Thousands of people have improved their health with MediAI.
-                </p>
-              </div>
-            </div>
-            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
-              <div className="flex flex-col space-y-2 rounded-lg border p-6 shadow-sm">
-                <p className="text-gray-500">
-                  "MediAI has completely transformed how I manage my health. The personalized insights have helped me
-                  make better lifestyle choices."
-                </p>
-                <div className="flex items-center gap-2 pt-4">
-                  <div className="h-10 w-10 rounded-full bg-gray-200"></div>
-                  <div>
-                    <p className="font-medium">Sarah Johnson</p>
-                    <p className="text-sm text-gray-500">Fitness Enthusiast</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col space-y-2 rounded-lg border p-6 shadow-sm">
-                <p className="text-gray-500">
-                  "As someone with chronic health issues, MediAI has been invaluable in helping me track my symptoms and
-                  medications."
-                </p>
-                <div className="flex items-center gap-2 pt-4">
-                  <div className="h-10 w-10 rounded-full bg-gray-200"></div>
-                  <div>
-                    <p className="font-medium">Michael Chen</p>
-                    <p className="text-sm text-gray-500">Healthcare Professional</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col space-y-2 rounded-lg border p-6 shadow-sm">
-                <p className="text-gray-500">
-                  "The mental wellness features have been a game-changer for me. I'm more aware of my stress levels and
-                  have tools to manage them."
-                </p>
-                <div className="flex items-center gap-2 pt-4">
-                  <div className="h-10 w-10 rounded-full bg-gray-200"></div>
-                  <div>
-                    <p className="font-medium">Emily Rodriguez</p>
-                    <p className="text-sm text-gray-500">Teacher</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="w-full py-12 md:py-24 lg:py-32 bg-teal-600 text-white">
           <div className="px-4 md:px-6 max-w-7xl mx-auto w-full">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -213,6 +158,14 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
+      <footer className="w-full border-t bg-white py-6 mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 md:px-6">
+          <span className="text-gray-500 text-sm">© {new Date().getFullYear()} MediAI. All rights reserved.</span>
+          <div className="flex gap-6 mt-2 md:mt-0">
+            <Link href="/faq" className="text-sm font-medium text-primary-600 hover:underline">FAQ</Link>
+          </div>
+        </div>
+      </footer>
       <footer className="border-t bg-gray-50">
         <div className="max-w-7xl mx-auto flex flex-col gap-6 py-8 md:py-12 px-4 md:px-6 w-full">
           <div className="flex flex-col gap-6 lg:flex-row lg:justify-between lg:gap-12">

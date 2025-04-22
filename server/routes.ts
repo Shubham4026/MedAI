@@ -14,6 +14,7 @@ function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   return res.status(401).json({ message: "Authentication required" });
 }
 
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
@@ -90,6 +91,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // AI-powered autocorrect endpoint
+  app.post("/api/autocorrect", async (req, res) => {
+    const { text } = req.body;
+    if (!text) {
+      return res.status(400).json({ message: "Missing text" });
+    }
+    try {
+      const prompt = `Correct the grammar and spelling of the following sentence. Only return the corrected sentence.\n\n${text}`;
+      const llamaRes = await fetch("http://localhost:11434/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "llama3.2:latest",
+          messages: [
+            { role: "system", content: "You are a helpful assistant that corrects grammar and spelling." },
+            { role: "user", content: prompt }
+          ],
+          max_tokens: 128,
+          temperature: 0.2
+        })
+      });
+      console.log("comming hereeeeeee........")
+      if (!llamaRes.ok) throw new Error("Llama server error");
+      const data = await llamaRes.json();
+      const corrected = data.choices?.[0]?.message?.content?.trim() || text;
+      res.json({ corrected });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to autocorrect" });
+    }
+  });
+
   // API routes for conversations
   
   // Create a new conversation - requires authentication
