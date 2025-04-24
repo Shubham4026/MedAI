@@ -92,6 +92,25 @@ export default function LandingPage() {
         <Features />
         <Testimonial />
 
+        {/* Nearby Hospitals Section */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
+          <div className="px-4 md:px-6 max-w-7xl mx-auto w-full">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Nearby Hospitals</h2>
+              <p className="max-w-[700px] text-gray-500 md:text-xl mb-4">
+                Find hospitals close to your location for quick access to healthcare.
+              </p>
+              <Button
+                size="lg"
+                className="bg-teal-600 hover:bg-teal-700 text-white"
+                onClick={() => setLocation("/nearby-hospitals")}
+              >
+                View Nearby Hospitals
+              </Button>
+            </div>
+          </div>
+        </section>
+
         <section className="w-full py-12 md:py-24 lg:py-32 bg-teal-600 text-white">
           <div className="px-4 md:px-6 max-w-7xl mx-auto w-full">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">

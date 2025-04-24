@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "City Hospital",
+    "address": "123 Main St, Downtown",
+    "lat": 18.5009733,
+    "lng": 73.8461063,
+    "specialties": ["Pediatric", "Heart"],
+    "timing": "08:00-20:00"
+  },
+  {
+    "id": 2,
+    "name": "Green Valley Clinic",
+    "address": "456 Greenway Ave, Suburbia",
+    "lat": 18.4781739,
+    "lng": 73.8621050,
+    "specialties": ["MD", "Ortho"],
+    "timing": "09:00-17:00"
+  },
+  {
+    "id": 3,
+    "name": "Lakeside Medical Center",
+    "address": "789 Lake Rd, Riverside",
+    "lat": 18.4910283,
+    "lng": 73.8581684,
+    "specialties": ["Heart", "Ortho"],
+    "timing": "24x7"
+  },
+  {
+    "id": 4,
+    "name": "Sahyadri Hospital, Bibvewadi",
+    "address": "Plot No.13, S.No.573,City No.281, Next To Suhaag Mangal Karyalay, Swami Vivekanand Marg, Bibvewadi",
+    "lat": 18.4781739,
+    "lng": 73.8621050,
+    "specialties": ["MD", "Pediatric"],
+    "timing": "09:00-21:00"
+  }
+]

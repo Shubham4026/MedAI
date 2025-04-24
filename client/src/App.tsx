@@ -13,6 +13,8 @@ const ProfileEdit = lazy(() => import("@/pages/profile-edit"));
 const Pricing = lazy(() => import("@/pages/pricing"));
 const Contact = lazy(() => import("@/pages/contact"));
 const FAQ = lazy(() => import("@/pages/faq"));
+const NearbyHospitalsPage = lazy(() => import("@/pages/nearby-hospitals"));
+
 import { HeartPulse } from "lucide-react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { Route as WouterRoute, Redirect } from "wouter";
@@ -67,6 +69,7 @@ function Router() {
         <WouterRoute path="/pricing" component={Pricing} />
         <WouterRoute path="/contact" component={Contact} />
         <WouterRoute path="/faq" component={FAQ} />
+        <WouterRoute path="/nearby-hospitals" component={NearbyHospitalsPage} />
         <WouterRoute path="/auth" component={AuthPage} />
         {/* Fallback to 404 */}
         <Route component={NotFound} />

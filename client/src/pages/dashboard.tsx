@@ -248,13 +248,19 @@ export default function Dashboard() {
                 </div>
               </Card>
 
-              <Card className="p-6 hover:shadow-lg transition-shadow">
+              <Card
+                className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => setLocation('/nearby-hospitals')}
+                role="button"
+                tabIndex={0}
+                onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') setLocation('/nearby-hospitals'); }}
+              >
                 <div className="flex items-center gap-4">
                   <div className="bg-blue-100 p-3 rounded-full">
                     <Building2 className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Nearby Hospitals</h3>
+                    <h3 className="font-semibold text-blue-700">Nearby Hospitals</h3>
                     <p className="text-sm text-muted-foreground">Find healthcare facilities</p>
                   </div>
                 </div>
