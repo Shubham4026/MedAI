@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import HospitalCard from "./HospitalCard";
 import FilterBar from "./FilterBar";
-import { fetchHospitals } from "@/services/hospitalService";
+import { fetchHospitals, fetchHospitalsFromGoogle } from "@/services/hospitalService";
 
 interface Hospital {
   id: number;
@@ -24,14 +24,30 @@ const NearbyHospitalsList: React.FC<NearbyHospitalsListProps> = ({ userLocation 
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fallback, setFallback] = useState(false);
 
   useEffect(() => {
     if (!userLocation) return;
     setLoading(true);
     setError(null);
-    fetchHospitals(userLocation.lat, userLocation.lng, filters)
-      .then(setHospitals)
-      .catch(() => setError("Failed to fetch hospitals."))
+    setFallback(false);
+    fetchHospitalsFromGoogle(userLocation.lat, userLocation.lng, filters)
+      .then(results => {
+        if (results && results.length > 0) {
+          setHospitals(results);
+        } else {
+          setFallback(true);
+          fetchHospitals(userLocation.lat, userLocation.lng, filters)
+            .then(setHospitals)
+            .catch(() => setError("Failed to fetch hospitals."));
+        }
+      })
+      .catch(() => {
+        setFallback(true);
+        fetchHospitals(userLocation.lat, userLocation.lng, filters)
+          .then(setHospitals)
+          .catch(() => setError("Failed to fetch hospitals."));
+      })
       .finally(() => setLoading(false));
   }, [userLocation, filters]);
 
@@ -50,6 +66,9 @@ const NearbyHospitalsList: React.FC<NearbyHospitalsListProps> = ({ userLocation 
         </div>
       )}
       {error && <div className="text-center text-red-500 py-8">{error}</div>}
+      {fallback && !loading && !error && (
+        <div className="text-center text-yellow-600 py-2 text-sm font-medium">Google Places unavailable, showing saved hospital data.</div>
+      )}
       {!loading && !error && hospitals.length === 0 && (
         <div className="text-center text-gray-400 py-8">No hospitals found for your filters.</div>
       )}

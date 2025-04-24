@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { analyzeSymptoms } from "./services/gemini-direct";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { setupAuth } from "./auth";
+import { fetchHospitalsFromGoogle } from "./services/googleHospitals";
 
 // Middleware to check if the user is authenticated
 function isAuthenticated(req: Request, res: Response, next: NextFunction) {
@@ -22,6 +23,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
   
+  // Hospitals proxy endpoint (no auth required)
+  app.get("/api/hospitals", async (req: Request, res: Response) => {
+    try {
+      console.log("[GET] /api/hospitals called", req.query);
+      const hospitals = await fetchHospitalsFromGoogle(req);
+      res.json(hospitals);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to fetch hospitals" });
+    }
+  });
+
   // User routes - protected by authentication middleware
   app.get("/api/health-profile", isAuthenticated, async (req, res) => {
     try {

@@ -13,6 +13,18 @@ const getDistance = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
+export const fetchHospitalsFromGoogle = async (lat, lng, filters) => {
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lng: String(lng),
+    specialty: filters.specialty || '',
+    radius: filters.radius ? String(filters.radius) : ''
+  });
+  const response = await fetch(`/api/hospitals?${params.toString()}`);
+  const data = await response.json();
+  return data;
+};
+
 export const fetchHospitals = async (lat, lng, filters) => {
   // Replace this with real API later
   const response = await fetch('/mock-data/hospitals.json');
