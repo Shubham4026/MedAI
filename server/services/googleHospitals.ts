@@ -6,7 +6,7 @@ export async function fetchHospitalsFromGoogle(req: Request) {
   const lng = req.query.lng;
   const specialty = req.query.specialty;
   const radius = req.query.radius ? Number(req.query.radius) * 1000 : 10000;
-  const apiKey = process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!lat || !lng || !apiKey) {
     throw new Error('Missing required parameters or API key');
   }

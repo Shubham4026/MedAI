@@ -5,6 +5,8 @@ interface Hospital {
   address: string;
   timing?: string;
   specialties?: string[];
+  lat: number;
+  lng: number;
 }
 
 function checkOpenStatus(timing?: string): boolean {
@@ -57,7 +59,15 @@ const HospitalCard = ({ hospital }: { hospital: Hospital }) => {
             </span>
           )}
         </div>
-        <button className="mt-4 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-teal-500 to-teal-600 text-white text-sm font-semibold shadow hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 transition">Get Directions</button>
+        <button
+          className="mt-4 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-teal-500 to-teal-600 text-white text-sm font-semibold shadow hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 transition"
+          onClick={() => {
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lng}`;
+            window.open(url, '_blank');
+          }}
+        >
+          Get Directions
+        </button>
       </div>
     </div>
   );
