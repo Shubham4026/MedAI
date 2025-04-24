@@ -191,7 +191,8 @@ export default function Dashboard() {
           {/* Primary Actions */}
           <div>
             <h2 className="text-2xl font-semibold mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            
               <Link href="/symptom-checker">
                 <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-4">
@@ -236,7 +237,7 @@ export default function Dashboard() {
           <div>
             <h2 className="text-2xl font-semibold mb-4">Additional Services</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="p-6 hover:shadow-lg transition-shadow">
+              <Card className="p-6 hover:shadow-lg transition-shadow" onClick={() => setLocation('/diet-plan')}>
                 <div className="flex items-center gap-4">
                   <div className="bg-green-100 p-3 rounded-full">
                     <Apple className="w-6 h-6 text-green-600" />

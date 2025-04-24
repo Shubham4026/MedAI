@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
-import { Bolt } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 
 interface MessageBubbleProps {
   role: "user" | "assistant";
@@ -23,7 +23,7 @@ export function MessageBubble({ role, content, className }: MessageBubbleProps) 
       {!isUser && (
         <div className="flex-shrink-0 mr-2">
           <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center">
-            <Bolt className="h-5 w-5 text-blue-600" />
+            <Stethoscope className="h-5 w-5 text-blue-600" />
           </div>
         </div>
       )}
