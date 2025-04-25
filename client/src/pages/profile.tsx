@@ -260,6 +260,55 @@ export default function Profile() {
                   )}
                 </div>
               </div>
+
+              {/* --- NEW FIELDS FROM SCHEMA --- */}
+              {/* Lifestyle & Diet */}
+              <div className="mt-6">
+                <h3 className="font-semibold">Lifestyle & Diet</h3>
+                <div>Diet Type: {profile?.dietType || '-'}</div>
+                <div>Daily Caloric Intake: {profile?.dailyCaloricIntake ?? '-'}</div>
+                <div>Water Intake (liters): {profile?.waterIntakeLiters ?? '-'}</div>
+                <div>Activity Level: {profile?.activityLevel || '-'}</div>
+                <div>Exercise Frequency: {profile?.exerciseFrequency || '-'}</div>
+                <div>Step Count (Avg Daily): {profile?.stepCountAvgDaily ?? '-'}</div>
+              </div>
+              {/* Vitals & Biometrics */}
+              <div className="mt-6">
+                <h3 className="font-semibold">Vitals & Biometrics</h3>
+                <div>Blood Pressure: {profile?.bloodPressure || '-'}</div>
+                <div>Heart Rate: {profile?.heartRate ?? '-'}</div>
+                <div>Respiratory Rate: {profile?.respiratoryRate ?? '-'}</div>
+                <div>Body Temperature: {profile?.bodyTemperature ?? '-'}</div>
+                <div>Blood Sugar Level: {profile?.bloodSugarLevel ?? '-'}</div>
+                <div>Cholesterol Level: {profile?.cholesterolLevel ?? '-'}</div>
+              </div>
+              {/* Mental Health & Sleep */}
+              <div className="mt-6">
+                <h3 className="font-semibold">Mental Health & Sleep</h3>
+                <div>Stress Level: {profile?.stressLevel ?? '-'}</div>
+                <div>Sleep Quality: {profile?.sleepQuality || '-'}</div>
+                <div>Hours of Sleep: {profile?.hoursOfSleep ?? '-'}</div>
+                <div>Mental Health Issues: {(profile?.mentalHealthIssues || []).join(', ') || '-'}</div>
+              </div>
+              {/* Environmental & Social */}
+              <div className="mt-6">
+                <h3 className="font-semibold">Environmental & Social</h3>
+                <div>Occupation Type: {profile?.occupationType || '-'}</div>
+                <div>Exposure to Pollution: {profile?.exposureToPollution || '-'}</div>
+                <div>Social Connections: {profile?.socialConnections || '-'}</div>
+                <div>Vaccination History: {(profile?.vaccinationHistory || []).join(', ') || '-'}</div>
+                <div>Screenings Done: {(profile?.screeningsDone || []).join(', ') || '-'}</div>
+              </div>
+              {/* Derived/Calculated Fields */}
+              <div className="mt-6">
+                <h3 className="font-semibold">Derived/Calculated</h3>
+                <div>BMI: {profile?.bmi ?? '-'}</div>
+                <div>BMI Category: {profile?.bmiCategory || '-'}</div>
+                <div>Health Score: {profile?.healthScore ?? '-'}</div>
+                <div>Risk Flags: {(profile?.riskFlags || []).join(', ') || '-'}</div>
+                <div>Nutritional Deficiencies: {(profile?.nutritionalDeficiencies || []).join(', ') || '-'}</div>
+                <div>Recent Lab Results: <pre className="inline whitespace-pre-wrap">{profile?.recentLabResults ? JSON.stringify(profile.recentLabResults, null, 2) : '-'}</pre></div>
+              </div>
             </div>
           </Card>
 

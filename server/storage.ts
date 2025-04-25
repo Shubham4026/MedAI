@@ -91,13 +91,25 @@ export class DatabaseStorage implements IStorage {
     return createdProfile;
   }
   
-  async updateHealthProfile(userId: number, profileUpdate: Partial<InsertHealthProfile>): Promise<HealthProfile | undefined> {
+  async updateHealthProfile(
+    userId: number,
+    profileUpdate: Partial<Omit<InsertHealthProfile, 'id' | 'userId' | 'lastUpdated'>>
+  ): Promise<HealthProfile> {
     const [updatedProfile] = await db
       .update(healthProfiles)
       .set({ ...profileUpdate, lastUpdated: new Date() })
       .where(eq(healthProfiles.userId, userId))
       .returning();
-    return updatedProfile;
+  
+    if (updatedProfile) return updatedProfile;
+  
+    // If not found, create a new profile
+    const [createdProfile] = await db
+      .insert(healthProfiles)
+      .values({ ...profileUpdate, userId, lastUpdated: new Date() })
+      .returning();
+  
+    return createdProfile;
   }
   
   // Health metrics methods

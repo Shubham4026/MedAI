@@ -26,7 +26,39 @@ interface HealthProfile {
   weight?: number;
   bloodType?: string;
   allergies?: string[];
+  chronicConditions?: string[];
   medications?: string[];
+  familyHistory?: string[];
+  lifestyleHabits?: Record<string, any>;
+  dietType?: string;
+  dailyCaloricIntake?: number;
+  waterIntakeLiters?: number;
+  activityLevel?: string;
+  exerciseFrequency?: string;
+  stepCountAvgDaily?: number;
+  stressLevel?: number;
+  sleepQuality?: string;
+  hoursOfSleep?: number;
+  mentalHealthIssues?: string[];
+  bloodPressure?: string;
+  heartRate?: number;
+  respiratoryRate?: number;
+  bodyTemperature?: number;
+  bloodSugarLevel?: number;
+  cholesterolLevel?: number;
+  nutritionalDeficiencies?: string[];
+  recentLabResults?: Record<string, any>;
+  vaccinationHistory?: string[];
+  screeningsDone?: string[];
+  occupationType?: string;
+  exposureToPollution?: string;
+  socialConnections?: string;
+  bmi?: number;
+  bmiCategory?: string;
+  healthScore?: number;
+  riskFlags?: string[];
+  lastUpdated?: string;
+  // legacy fields
   conditions?: string[];
   emergencyContact?: string;
   lastCheckup?: string;
@@ -49,7 +81,38 @@ export default function ProfileEdit() {
     weight: undefined,
     bloodType: '',
     allergies: [],
+    chronicConditions: [],
     medications: [],
+    familyHistory: [],
+    lifestyleHabits: {},
+    dietType: '',
+    dailyCaloricIntake: undefined,
+    waterIntakeLiters: undefined,
+    activityLevel: '',
+    exerciseFrequency: '',
+    stepCountAvgDaily: undefined,
+    stressLevel: undefined,
+    sleepQuality: '',
+    hoursOfSleep: undefined,
+    mentalHealthIssues: [],
+    bloodPressure: '',
+    heartRate: undefined,
+    respiratoryRate: undefined,
+    bodyTemperature: undefined,
+    bloodSugarLevel: undefined,
+    cholesterolLevel: undefined,
+    nutritionalDeficiencies: [],
+    recentLabResults: {},
+    vaccinationHistory: [],
+    screeningsDone: [],
+    occupationType: '',
+    exposureToPollution: '',
+    socialConnections: '',
+    bmi: undefined,
+    bmiCategory: '',
+    healthScore: undefined,
+    riskFlags: [],
+    lastUpdated: '',
     conditions: [],
     emergencyContact: '',
     lastCheckup: ''
@@ -83,9 +146,47 @@ export default function ProfileEdit() {
         setProfile(data || {
           id: 0,
           userId: user?.id || 0,
+          dateOfBirth: '',
+          gender: '',
+          height: undefined,
+          weight: undefined,
+          bloodType: '',
           allergies: [],
+          chronicConditions: [],
           medications: [],
-          conditions: []
+          familyHistory: [],
+          lifestyleHabits: {},
+          dietType: '',
+          dailyCaloricIntake: undefined,
+          waterIntakeLiters: undefined,
+          activityLevel: '',
+          exerciseFrequency: '',
+          stepCountAvgDaily: undefined,
+          stressLevel: undefined,
+          sleepQuality: '',
+          hoursOfSleep: undefined,
+          mentalHealthIssues: [],
+          bloodPressure: '',
+          heartRate: undefined,
+          respiratoryRate: undefined,
+          bodyTemperature: undefined,
+          bloodSugarLevel: undefined,
+          cholesterolLevel: undefined,
+          nutritionalDeficiencies: [],
+          recentLabResults: {},
+          vaccinationHistory: [],
+          screeningsDone: [],
+          occupationType: '',
+          exposureToPollution: '',
+          socialConnections: '',
+          bmi: undefined,
+          bmiCategory: '',
+          healthScore: undefined,
+          riskFlags: [],
+          lastUpdated: '',
+          conditions: [],
+          emergencyContact: '',
+          lastCheckup: ''
         });
       }
     } catch (error) {
@@ -389,6 +490,98 @@ export default function ProfileEdit() {
                       </Button>
                     </Badge>
                   ))}
+                </div>
+              </div>
+
+              {/* --- NEW FIELDS FROM SCHEMA --- */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                {/* Lifestyle & Diet */}
+                <div>
+                  <Label>Diet Type</Label>
+                  <Input value={profile.dietType || ''} onChange={e => setProfile(p => ({...p, dietType: e.target.value}))} placeholder="e.g. Vegetarian, Vegan, etc." />
+                  <Label className="mt-2">Daily Caloric Intake</Label>
+                  <Input type="number" value={profile.dailyCaloricIntake || ''} onChange={e => setProfile(p => ({...p, dailyCaloricIntake: Number(e.target.value)}))} placeholder="Calories" />
+                  <Label className="mt-2">Water Intake (liters)</Label>
+                  <Input type="number" value={profile.waterIntakeLiters || ''} onChange={e => setProfile(p => ({...p, waterIntakeLiters: Number(e.target.value)}))} placeholder="Liters" />
+                  <Label className="mt-2">Activity Level</Label>
+                  <Input value={profile.activityLevel || ''} onChange={e => setProfile(p => ({...p, activityLevel: e.target.value}))} placeholder="e.g. Sedentary, Active" />
+                  <Label className="mt-2">Exercise Frequency</Label>
+                  <Input value={profile.exerciseFrequency || ''} onChange={e => setProfile(p => ({...p, exerciseFrequency: e.target.value}))} placeholder="e.g. 3x/week" />
+                  <Label className="mt-2">Step Count (Avg Daily)</Label>
+                  <Input type="number" value={profile.stepCountAvgDaily || ''} onChange={e => setProfile(p => ({...p, stepCountAvgDaily: Number(e.target.value)}))} placeholder="Steps" />
+                </div>
+                {/* Vitals & Biometrics */}
+                <div>
+                  <Label>Blood Pressure</Label>
+                  <Input value={profile.bloodPressure || ''} onChange={e => setProfile(p => ({...p, bloodPressure: e.target.value}))} placeholder="e.g. 120/80" />
+                  <Label className="mt-2">Heart Rate</Label>
+                  <Input type="number" value={profile.heartRate || ''} onChange={e => setProfile(p => ({...p, heartRate: Number(e.target.value)}))} placeholder="bpm" />
+                  <Label className="mt-2">Respiratory Rate</Label>
+                  <Input type="number" value={profile.respiratoryRate || ''} onChange={e => setProfile(p => ({...p, respiratoryRate: Number(e.target.value)}))} placeholder="breaths/min" />
+                  <Label className="mt-2">Body Temperature (°C)</Label>
+                  <Input type="number" value={profile.bodyTemperature || ''} onChange={e => setProfile(p => ({...p, bodyTemperature: Number(e.target.value)}))} placeholder="°C" />
+                  <Label className="mt-2">Blood Sugar Level</Label>
+                  <Input type="number" value={profile.bloodSugarLevel || ''} onChange={e => setProfile(p => ({...p, bloodSugarLevel: Number(e.target.value)}))} placeholder="mg/dL" />
+                  <Label className="mt-2">Cholesterol Level</Label>
+                  <Input type="number" value={profile.cholesterolLevel || ''} onChange={e => setProfile(p => ({...p, cholesterolLevel: Number(e.target.value)}))} placeholder="mg/dL" />
+                </div>
+              </div>
+
+              {/* Mental Health & Sleep */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div>
+                  <Label>Stress Level (1-10)</Label>
+                  <Input type="number" value={profile.stressLevel || ''} min={1} max={10} onChange={e => setProfile(p => ({...p, stressLevel: Number(e.target.value)}))} placeholder="1-10" />
+                  <Label className="mt-2">Sleep Quality</Label>
+                  <Input value={profile.sleepQuality || ''} onChange={e => setProfile(p => ({...p, sleepQuality: e.target.value}))} placeholder="e.g. Good, Poor" />
+                  <Label className="mt-2">Hours of Sleep</Label>
+                  <Input type="number" value={profile.hoursOfSleep || ''} onChange={e => setProfile(p => ({...p, hoursOfSleep: Number(e.target.value)}))} placeholder="Hours" />
+                </div>
+                <div>
+                  <Label>Mental Health Issues (comma separated)</Label>
+                  <Input value={(profile.mentalHealthIssues || []).join(', ')} onChange={e => setProfile(p => ({...p, mentalHealthIssues: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. Anxiety, Depression" />
+                </div>
+              </div>
+
+              {/* Environmental & Social */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div>
+                  <Label>Occupation Type</Label>
+                  <Input value={profile.occupationType || ''} onChange={e => setProfile(p => ({...p, occupationType: e.target.value}))} placeholder="e.g. Office, Field" />
+                  <Label className="mt-2">Exposure to Pollution</Label>
+                  <Input value={profile.exposureToPollution || ''} onChange={e => setProfile(p => ({...p, exposureToPollution: e.target.value}))} placeholder="e.g. High, Low" />
+                  <Label className="mt-2">Social Connections</Label>
+                  <Input value={profile.socialConnections || ''} onChange={e => setProfile(p => ({...p, socialConnections: e.target.value}))} placeholder="e.g. Strong, Weak" />
+                </div>
+                <div>
+                  <Label>Vaccination History (comma separated)</Label>
+                  <Input value={(profile.vaccinationHistory || []).join(', ')} onChange={e => setProfile(p => ({...p, vaccinationHistory: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. COVID-19, Tetanus" />
+                  <Label className="mt-2">Screenings Done (comma separated)</Label>
+                  <Input value={(profile.screeningsDone || []).join(', ')} onChange={e => setProfile(p => ({...p, screeningsDone: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. Mammogram, Colonoscopy" />
+                </div>
+              </div>
+
+              {/* Derived/Calculated Fields (read-only or optional) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div>
+                  <Label>BMI</Label>
+                  <Input type="number" value={profile.bmi || ''} onChange={e => setProfile(p => ({...p, bmi: Number(e.target.value)}))} placeholder="Auto or manual" />
+                  <Label className="mt-2">BMI Category</Label>
+                  <Input value={profile.bmiCategory || ''} onChange={e => setProfile(p => ({...p, bmiCategory: e.target.value}))} placeholder="e.g. Normal, Overweight" />
+                  <Label className="mt-2">Health Score</Label>
+                  <Input type="number" value={profile.healthScore || ''} onChange={e => setProfile(p => ({...p, healthScore: Number(e.target.value)}))} placeholder="Auto or manual" />
+                  <Label className="mt-2">Risk Flags (comma separated)</Label>
+                  <Input value={(profile.riskFlags || []).join(', ')} onChange={e => setProfile(p => ({...p, riskFlags: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. High BP, Diabetes" />
+                </div>
+                <div>
+                  <Label>Nutritional Deficiencies (comma separated)</Label>
+                  <Input value={(profile.nutritionalDeficiencies || []).join(', ')} onChange={e => setProfile(p => ({...p, nutritionalDeficiencies: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. Vitamin D, Iron" />
+                  <Label className="mt-2">Recent Lab Results (JSON)</Label>
+                  <Textarea value={JSON.stringify(profile.recentLabResults || {}, null, 2)} onChange={e => {
+                    try {
+                      setProfile(p => ({...p, recentLabResults: JSON.parse(e.target.value)}));
+                    } catch {}
+                  }} placeholder='{"glucose": 95, "cholesterol": 180}' />
                 </div>
               </div>
             </div>

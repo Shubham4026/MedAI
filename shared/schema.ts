@@ -30,19 +30,78 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
 // Health profile for storing user health information
+// export const healthProfiles = pgTable("health_profiles", {
+//   id: serial("id").primaryKey(),
+//   userId: integer("user_id").notNull(),
+//   age: integer("age"),
+//   gender: text("gender"),
+//   height: real("height"), // in cm
+//   weight: real("weight"), // in kg
+//   bloodType: text("blood_type"),
+//   allergies: jsonb("allergies").default([]),
+//   chronicConditions: jsonb("chronic_conditions").default([]),
+//   medications: jsonb("medications").default([]),
+//   familyHistory: jsonb("family_history").default([]),
+//   lifestyleHabits: jsonb("lifestyle_habits").default({}),
+//   lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+// });
+
 export const healthProfiles = pgTable("health_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
+
+  // Basic Info
   age: integer("age"),
   gender: text("gender"),
-  height: real("height"), // in cm
+  height: real("height"), // in meters
   weight: real("weight"), // in kg
   bloodType: text("blood_type"),
+
+  // Medical History
   allergies: jsonb("allergies").default([]),
   chronicConditions: jsonb("chronic_conditions").default([]),
   medications: jsonb("medications").default([]),
   familyHistory: jsonb("family_history").default([]),
+
+  // Lifestyle & Diet
   lifestyleHabits: jsonb("lifestyle_habits").default({}),
+  dietType: text("diet_type"),
+  dailyCaloricIntake: integer("daily_caloric_intake"),
+  waterIntakeLiters: real("water_intake_liters"),
+  activityLevel: text("activity_level"),
+  exerciseFrequency: text("exercise_frequency"),
+  stepCountAvgDaily: integer("step_count_avg_daily"),
+
+  // Mental Health & Sleep
+  stressLevel: integer("stress_level"),
+  sleepQuality: text("sleep_quality"),
+  hoursOfSleep: real("hours_of_sleep"),
+  mentalHealthIssues: jsonb("mental_health_issues").default([]),
+
+  // Vitals & Biometrics
+  bloodPressure: text("blood_pressure"),
+  heartRate: integer("heart_rate"),
+  respiratoryRate: integer("respiratory_rate"),
+  bodyTemperature: real("body_temperature"),
+  bloodSugarLevel: real("blood_sugar_level"),
+  cholesterolLevel: real("cholesterol_level"),
+  nutritionalDeficiencies: jsonb("nutritional_deficiencies").default([]),
+
+  // Environmental & Social
+  recentLabResults: jsonb("recent_lab_results").default({}),
+  vaccinationHistory: jsonb("vaccination_history").default([]),
+  screeningsDone: jsonb("screenings_done").default([]),
+  occupationType: text("occupation_type"),
+  exposureToPollution: text("exposure_to_pollution"),
+  socialConnections: text("social_connections"),
+
+  // Derived / Calculated
+  bmi: real("bmi"),
+  bmiCategory: text("bmi_category"),
+  healthScore: real("health_score"),
+  riskFlags: jsonb("risk_flags").default([]),
+
+  // Audit
   lastUpdated: timestamp("last_updated").notNull().defaultNow(),
 });
 
@@ -65,6 +124,34 @@ export const insertHealthProfileSchema = createInsertSchema(healthProfiles).pick
   medications: true,
   familyHistory: true,
   lifestyleHabits: true,
+  dietType: true,
+  dailyCaloricIntake: true,
+  waterIntakeLiters: true,
+  activityLevel: true,
+  exerciseFrequency: true,
+  stepCountAvgDaily: true,
+  stressLevel: true,
+  sleepQuality: true,
+  hoursOfSleep: true,
+  mentalHealthIssues: true,
+  bloodPressure: true,
+  heartRate: true,
+  respiratoryRate: true,
+  bodyTemperature: true,
+  bloodSugarLevel: true,
+  cholesterolLevel: true,
+  nutritionalDeficiencies: true,
+  recentLabResults: true,
+  vaccinationHistory: true,
+  screeningsDone: true,
+  occupationType: true,
+  exposureToPollution: true,
+  socialConnections: true,
+  bmi: true,
+  bmiCategory: true,
+  healthScore: true,
+  riskFlags: true,
+  lastUpdated: true,
 });
 
 export type InsertHealthProfile = z.infer<typeof insertHealthProfileSchema>;

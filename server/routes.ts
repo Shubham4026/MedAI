@@ -65,6 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/health-profile", isAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
+      console.log("[GET] /api/health-profile called", { userId });
       const profile = await storage.getHealthProfile(userId);
       
       if (!profile) {
@@ -81,11 +82,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Not authenticated" });
     }
-
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const updates = { ...req.body };
-
       // Calculate age if dateOfBirth is provided
       if (updates.dateOfBirth) {
         const birthDate = new Date(updates.dateOfBirth);
@@ -103,6 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update health profile
       const updatedProfile = await storage.updateHealthProfile(userId, updates);
+      console.log("[PATCH] Health profile updated", { userId, updates, updatedProfile });
       res.json(updatedProfile);
     } catch (error: any) {
       console.error("Error updating health profile:", error);

@@ -16,6 +16,7 @@ const FAQ = lazy(() => import("@/pages/faq"));
 const NearbyHospitalsPage = lazy(() => import("@/pages/nearby-hospitals"));
 const DietPlan = lazy(() => import("@/pages/DietPlan"));
 const HealthMetrics = lazy(() => import("@/pages/health-metrics"));
+const FindDrugs = lazy(() => import("@/pages/find-drugs"));
 
 import { HeartPulse } from "lucide-react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
@@ -75,6 +76,7 @@ function Router() {
         <WouterRoute path="/auth" component={AuthPage} />
         <WouterRoute path="/diet-plan" component={DietPlan} />
         <WouterRoute path="/health-metrics" component={HealthMetrics} />
+        <WouterRoute path="/find-drugs" component={FindDrugs} />
         {/* Fallback to 404 */}
         <Route component={NotFound} />
       </Switch>
