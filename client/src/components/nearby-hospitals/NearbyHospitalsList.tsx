@@ -4,13 +4,11 @@ import FilterBar from "./FilterBar";
 import { fetchHospitals, fetchHospitalsFromGoogle } from "@/services/hospitalService";
 
 interface Hospital {
-  id: number;
+  id: string; // Now represents Google Place ID
   name: string;
   address: string;
   lat: number;
   lng: number;
-  specialties: string[];
-  timing?: string;
 }
 
 interface NearbyHospitalsListProps {
@@ -26,9 +24,15 @@ const NearbyHospitalsList: React.FC<NearbyHospitalsListProps> = ({ userLocation 
   const [error, setError] = useState<string | null>(null);
   const [fallback, setFallback] = useState(false);
 
+  // Handler to merge filter updates from FilterBar
+  const handleFilterChange = (newFilters: Partial<{ specialty: string; radius: number }>) => {
+    setFilters(prevFilters => ({ ...prevFilters, ...newFilters }));
+  };
+
   useEffect(() => {
     if (!userLocation) return;
     setLoading(true);
+    setHospitals([]); // Clear previous results immediately
     setError(null);
     setFallback(false);
     fetchHospitalsFromGoogle(userLocation.lat, userLocation.lng, filters)
@@ -53,7 +57,7 @@ const NearbyHospitalsList: React.FC<NearbyHospitalsListProps> = ({ userLocation 
 
   return (
     <div>
-      <FilterBar filters={filters} onChange={setFilters} />
+      <FilterBar filters={filters} onChange={handleFilterChange} />
       {loading && (
         <div className="flex flex-col items-center justify-center py-12">
           <svg className="w-12 h-12 text-teal-500 animate-pulse mb-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">

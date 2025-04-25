@@ -7,6 +7,7 @@ import { analyzeSymptoms } from "./services/gemini-direct";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { setupAuth } from "./auth";
 import { fetchHospitalsFromGoogle } from "./services/googleHospitals";
+import { fetchPlaceDetails } from "./services/googleHospitals";
 
 // Middleware to check if the user is authenticated
 function isAuthenticated(req: Request, res: Response, next: NextFunction) {
@@ -58,6 +59,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(hospitals);
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Failed to fetch hospitals" });
+    }
+  });
+
+  // New endpoint for fetching details of a single place (no auth needed)
+  app.get("/api/place-details/:placeId", async (req: Request, res: Response) => {
+    const { placeId } = req.params;
+    if (!placeId) {
+      return res.status(400).json({ message: "Missing placeId parameter" });
+    }
+    try {
+      console.log(`[GET] /api/place-details/${placeId} called`);
+      const details = await fetchPlaceDetails(placeId);
+      res.json(details);
+    } catch (error: any) {
+      console.error(`Error fetching details for ${placeId}:`, error);
+      res.status(500).json({ message: error.message || `Failed to fetch details for place ${placeId}` });
     }
   });
 
