@@ -3,6 +3,7 @@ import { apiRequest } from "./queryClient";
 import { Conversation, Message, Analysis } from "./types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { fetchWithAuth } from "./fetchWithAuth";
 
 // Custom hook for handling conversations
 export function useConversations() {
@@ -27,7 +28,7 @@ export function useConversations() {
     queryKey: ['/api/conversations'] as const,
     queryFn: async () => {
       try {
-        const res = await fetch('/api/conversations');
+        const res = await fetchWithAuth('/api/conversations');
         if (!res.ok) throw new Error('Failed to fetch conversations');
         return res.json();
       } catch (error) {
@@ -99,7 +100,7 @@ export function useConversation(conversationId?: number) {
     enabled: !!conversationId,
     queryFn: async () => {
       try {
-        const res = await fetch(`/api/conversations/${conversationId}/messages`);
+        const res = await fetchWithAuth(`/api/conversations/${conversationId}/messages`);
         if (!res.ok) throw new Error('Failed to fetch messages');
         return res.json();
       } catch (error) {
@@ -140,7 +141,7 @@ export function useConversation(conversationId?: number) {
     enabled: !!conversationId,
     queryFn: async () => {
       try {
-        const res = await fetch(`/api/conversations/${conversationId}/analyses`);
+        const res = await fetchWithAuth(`/api/conversations/${conversationId}/analyses`);
         if (!res.ok) throw new Error('Failed to fetch analyses');
         return res.json();
       } catch (error) {

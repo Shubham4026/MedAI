@@ -41,7 +41,15 @@ export default function Home() {
     if (!activeConversationId && sortedConversations && sortedConversations.length > 0) {
       setActiveConversationId(sortedConversations[0].id);
     }
-  }, [sortedConversations, activeConversationId]);
+    // If there are no conversations and not loading, create a new one automatically
+    if (!isLoading && sortedConversations.length === 0 && user?.id) {
+      createConversation({ title: 'New Symptom Assessment', userId: user.id }, {
+        onSuccess: (data) => {
+          setActiveConversationId(data.id);
+        }
+      });
+    }
+  }, [sortedConversations, activeConversationId, isLoading, user, createConversation]);
 
   const handleNewChat = () => {
     if (!user?.id) {
@@ -110,6 +118,14 @@ export default function Home() {
               >
                 New Assessment
               </Button>
+              <Link href="/voice-assistant">
+                <Button 
+                  variant="outline"
+                  className="border-teal-600 text-teal-600 hover:bg-teal-50"
+                >
+                  Voice Assistant
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

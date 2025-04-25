@@ -8,6 +8,7 @@ import { Message } from '@/lib/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { fetchWithAuth } from '@/lib/fetchWithAuth';
 
 interface ChatContainerProps {
   conversationId?: number;
@@ -43,7 +44,7 @@ export function ChatContainer({ conversationId }: ChatContainerProps) {
       // Summarize (truncate) the message for the title
       const summary = content.length > 48 ? content.slice(0, 48) + "..." : content;
       try {
-        await fetch(`/api/conversations/${conversationId}/title`, {
+        await fetchWithAuth(`/api/conversations/${conversationId}/title`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title: summary })

@@ -204,7 +204,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all conversations
   app.get("/api/conversations", async (req, res) => {
     try {
-      const conversations = await storage.getConversations();
+      const userId = req.user && req.user.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized: No user ID found in session." });
+      }
+      const conversations = await storage.getConversations(userId);
       res.json(conversations);
     } catch (error: any) {
       res.status(500).json({ message: `Server error: ${error?.message || "Unknown error"}` });
