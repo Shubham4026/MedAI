@@ -26,28 +26,39 @@ export default function LandingPage() {
             <span className="text-xl font-bold">MediAI</span>
           </Link>
           <nav className="hidden md:flex gap-6">
-            <Link href="/#features" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="/#features"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
               Features
             </Link>
-            <Link href="/pricing" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="/pricing"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
               Pricing
             </Link>
-            <Link href="/contact" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="/contact"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
               Contact
             </Link>
           </nav>
           <div className="flex gap-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setLocation("/auth?mode=login")}
             >
               Log In
             </Button>
-            <Button 
+
+            <button
               onClick={() => setLocation("/auth?mode=signup")}
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary-foreground h-11 rounded-md px-8 bg-teal-600 hover:bg-teal-700"
             >
               Sign Up
-            </Button>
+            </button>
           </div>
         </div>
       </header>
@@ -61,13 +72,14 @@ export default function LandingPage() {
                     Your AI Health Assistant
                   </h1>
                   <p className="max-w-[600px] text-gray-500 md:text-xl">
-                    MediAI uses advanced artificial intelligence to monitor your health, provide personalized insights,
-                    and help you achieve your wellness goals.
+                    MediAI uses advanced artificial intelligence to monitor your
+                    health, provide personalized insights, and help you achieve
+                    your wellness goals.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="bg-teal-600 hover:bg-teal-700"
                     onClick={() => setLocation("/auth?mode=signup")}
                   >
@@ -96,9 +108,12 @@ export default function LandingPage() {
         <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
           <div className="px-4 md:px-6 max-w-7xl mx-auto w-full">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Nearby Hospitals</h2>
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+                Nearby Hospitals
+              </h2>
               <p className="max-w-[700px] text-gray-500 md:text-xl mb-4">
-                Find hospitals close to your location for quick access to healthcare.
+                Find hospitals close to your location for quick access to
+                healthcare.
               </p>
               <Button
                 size="lg"
@@ -115,14 +130,20 @@ export default function LandingPage() {
           <div className="px-4 md:px-6 max-w-7xl mx-auto w-full">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Ready to transform your health?</h2>
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+                  Ready to transform your health?
+                </h2>
                 <p className="max-w-[700px] text-teal-50 md:text-xl">
-                  Join thousands of users who have already improved their health with MediAI.
+                  Join thousands of users who have already improved their health
+                  with MediAI.
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <Link href="/auth">
-                  <Button size="lg" className="bg-white text-teal-600 hover:bg-teal-50">
+                  <Button
+                    size="lg"
+                    className="bg-white text-teal-600 hover:bg-teal-50"
+                  >
                     Get Started <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -133,9 +154,16 @@ export default function LandingPage() {
       </main>
       <footer className="w-full border-t bg-white py-6 mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 md:px-6">
-          <span className="text-gray-500 text-sm">© {new Date().getFullYear()} MediAI. All rights reserved.</span>
+          <span className="text-gray-500 text-sm">
+            © {new Date().getFullYear()} MediAI. All rights reserved.
+          </span>
           <div className="flex gap-6 mt-2 md:mt-0">
-            <Link href="/faq" className="text-sm font-medium text-primary-600 hover:underline">FAQ</Link>
+            <Link
+              href="/faq"
+              className="text-sm font-medium text-primary-600 hover:underline"
+            >
+              FAQ
+            </Link>
           </div>
         </div>
       </footer>
@@ -148,8 +176,9 @@ export default function LandingPage() {
                 <span className="text-xl font-bold">MediAI</span>
               </Link>
               <p className="text-sm text-gray-500 max-w-[400px]">
-                MediAI is an AI-powered virtual health assistant that helps you monitor your health, provides
-                personalized insights, and helps you achieve your wellness goals.
+                MediAI is an AI-powered virtual health assistant that helps you
+                monitor your health, provides personalized insights, and helps
+                you achieve your wellness goals.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-12 sm:grid-cols-3">
@@ -198,7 +227,9 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
-            <p className="text-xs text-gray-500">© {new Date().getFullYear()} MediAI. All rights reserved.</p>
+            <p className="text-xs text-gray-500">
+              © {new Date().getFullYear()} MediAI. All rights reserved.
+            </p>
             <div className="flex gap-4">
               <Link href="#" className="text-gray-500 hover:text-teal-600">
                 <svg
