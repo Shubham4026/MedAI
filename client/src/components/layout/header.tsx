@@ -17,7 +17,7 @@ export function Header({ onNewChat, onMenuToggle }: HeaderProps) {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
             <Bolt className="h-8 w-8 text-primary-500" />
-            <h1 className="ml-2 text-xl font-bold text-gray-900">MediAI</h1>
+            <h1 className="ml-2 text-xl font-bold text-gray-900">MedAI</h1>
           </div>
           
           <div className="flex items-center">

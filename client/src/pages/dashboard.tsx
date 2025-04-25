@@ -94,7 +94,7 @@ export default function Dashboard() {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
               <Activity className="h-7 w-7 text-teal-600" />
-              <span className="text-xl font-bold text-teal-600">MediAI</span>
+              <span className="text-xl font-bold text-teal-600">MedAI</span>
             </Link>
 
             {/* Right side navigation */}
@@ -442,7 +442,7 @@ export default function Dashboard() {
           <div className="border-t mt-12 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-sm text-gray-600">
-                © {new Date().getFullYear()} MediAI. All rights reserved.
+                © {new Date().getFullYear()} MedAI. All rights reserved.
               </p>
               <div className="flex items-center space-x-4 mt-4 md:mt-0">
                 <Link href="#" className="text-gray-400 hover:text-teal-600">
