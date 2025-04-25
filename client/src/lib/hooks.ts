@@ -44,9 +44,9 @@ export function useConversations() {
   });
 
   // Create a new conversation
-  const createConversationMutation = useMutation({
-    mutationFn: async ({ title, userId }: { title: string; userId: number }) => {
-      const response = await apiRequest("POST", "/api/conversations", { title, userId });
+  const createConversationMutation = useMutation<Conversation, Error, { title?: string; userId: number; initialMessageContent?: string }>({
+    mutationFn: async ({ title, userId, initialMessageContent }: { title?: string; userId: number; initialMessageContent?: string }) => {
+      const response = await apiRequest("POST", "/api/conversations", { title, userId, initialMessageContent });
       return await response.json();
     },
     onSuccess: () => {
@@ -186,7 +186,8 @@ export function useConversation(conversationId?: number) {
   // Combine messages with their analyses
   const messagesWithAnalyses = (messages as Message[] | undefined)?.map((message: Message) => {
     if (message.role === "assistant") {
-      const analysis = (analyses as Analysis[] | undefined)?.find((a: Analysis) => a.urgencyLevel);
+      // Find the specific analysis corresponding to this assistant message
+      const analysis = (analyses as Analysis[] | undefined)?.find((a: Analysis) => a.messageId === message.id);
       if (analysis) {
         return { ...message, analysis };
       }

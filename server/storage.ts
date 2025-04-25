@@ -95,21 +95,33 @@ export class DatabaseStorage implements IStorage {
     userId: number,
     profileUpdate: Partial<Omit<InsertHealthProfile, 'id' | 'userId' | 'lastUpdated'>>
   ): Promise<HealthProfile> {
-    const [updatedProfile] = await db
-      .update(healthProfiles)
-      .set({ ...profileUpdate, lastUpdated: new Date() })
-      .where(eq(healthProfiles.userId, userId))
-      .returning();
-  
-    if (updatedProfile) return updatedProfile;
-  
-    // If not found, create a new profile
-    const [createdProfile] = await db
-      .insert(healthProfiles)
-      .values({ ...profileUpdate, userId, lastUpdated: new Date() })
-      .returning();
-  
-    return createdProfile;
+    // First check if a profile exists for this user
+    const existingProfiles = await db
+      .select()
+      .from(healthProfiles)
+      .where(eq(healthProfiles.userId, userId));
+    
+    if (existingProfiles.length > 0) {
+      // If profile exists, update it
+      const [updatedProfile] = await db
+        .update(healthProfiles)
+        .set({ ...profileUpdate, lastUpdated: new Date() })
+        .where(eq(healthProfiles.userId, userId))
+        .returning();
+      
+      return updatedProfile;
+    } else {
+      // If profile doesn't exist, create a new one
+      // Remove id from profileUpdate to avoid primary key conflicts
+      const { id, ...safeUpdate } = profileUpdate as any;
+      
+      const [createdProfile] = await db
+        .insert(healthProfiles)
+        .values({ ...safeUpdate, userId, lastUpdated: new Date() })
+        .returning();
+      
+      return createdProfile;
+    }
   }
   
   // Health metrics methods

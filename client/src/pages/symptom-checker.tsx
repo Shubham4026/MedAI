@@ -126,6 +126,14 @@ export default function Home() {
                   Voice Assistant
                 </Button>
               </Link>
+              <Link href="/scan-report">
+                <Button 
+                  variant="ghost"
+                  className="border-teal-600 text-teal-600 hover:bg-teal-50"
+                >
+                  Scan Report
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

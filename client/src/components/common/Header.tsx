@@ -23,6 +23,7 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 const Header = () => {
   const { user } = useAuth();
+  const [location] = useLocation();
   const [, setLocation] = useLocation();
 
   const handleLogout = async () => {

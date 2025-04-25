@@ -11,6 +11,7 @@ export interface Suggestion {
 }
 
 export interface Analysis {
+  messageId: number; // Add the ID of the message this analysis belongs to
   urgencyLevel: UrgencyLevel;
   conditions: Condition[];
   suggestions: Suggestion[];
