@@ -12,34 +12,20 @@ import {
   Activity,
   Ambulance,
   Apple,
-  Bell,
   Brain,
   Building2,
   Calendar,
   Heart,
-  LogOut,
   MessageSquare,
   Phone,
-  Settings,
   Siren,
   TrendingUp,
-  User
 } from "lucide-react";
-import { Link } from "wouter";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { useLocation } from "wouter";
+import { useEffect } from "react";
+import { useLocation, Link } from "wouter";
 import { useProfileCompletion } from "@/hooks/use-profile-completion";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import Header from "@/components/common/Header";
 
 function ProfileCompletionBanner() {
   const { completion, loading } = useProfileCompletion();
@@ -81,76 +67,9 @@ export default function Dashboard() {
     }
   }, [user, setLocation]);
 
-  const handleLogout = async () => {
-    await fetchWithAuth("/api/logout", { method: "POST" });
-    window.location.href = "/auth?mode=login";
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2">
-              <Activity className="h-7 w-7 text-teal-600" />
-              <span className="text-xl font-bold text-teal-600">MedAI</span>
-            </Link>
-
-            {/* Right side navigation */}
-            <div className="flex items-center space-x-6">
-              {/* Quick Access */}
-              <div className="flex items-center space-x-4">
-                <Button variant="ghost" className="flex items-center space-x-2" title="Book Appointment">
-                  <Calendar className="h-6 w-6 text-gray-600" />
-                  <span className="hidden sm:inline">Book Appointment</span>
-                </Button>
-                <Button variant="ghost" className="flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50" title="Emergency">
-                  <Siren className="h-6 w-6" />
-                  <span className="hidden sm:inline">Emergency</span>
-                </Button>
-                <Button asChild variant="ghost" className="flex items-center space-x-2" title="Health Metrics">
-                  <Link href="/health-metrics">
-                    <TrendingUp className="h-6 w-6 text-gray-600" />
-                    <span className="hidden sm:inline">Health Metrics</span>
-                  </Link>
-                </Button>
-              </div>
-
-              {/* Notifications */}
-              <Button variant="ghost" size="icon" title="Notifications">
-                <Bell className="h-6 w-6 text-gray-600" />
-              </Button>
-
-              {/* Profile Menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" title="Profile">
-                    <User className="h-6 w-6 text-gray-600" />
-                  </Button>
-                </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setLocation('/profile')}>
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Profile Completion Banner */}
       <ProfileCompletionBanner />
@@ -258,8 +177,8 @@ export default function Dashboard() {
         <Apple className="w-6 h-6 text-green-600" />
       </div>
       <div>
-        <h3 className="font-semibold">Diet Plan</h3>
-        <p className="text-sm text-muted-foreground">Personalized nutrition guide</p>
+        <h3 className="font-semibold">Personalized Healthcare</h3>
+        <p className="text-sm text-muted-foreground">Get personalized healthcare recommendations</p>
       </div>
     </div>
   </Card>
@@ -458,7 +377,7 @@ export default function Dashboard() {
           <div className="border-t mt-12 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-sm text-gray-600">
-                © {new Date().getFullYear()} MedAI. All rights reserved.
+                {new Date().getFullYear()} MedAI. All rights reserved.
               </p>
               <div className="flex items-center space-x-4 mt-4 md:mt-0">
                 <Link href="#" className="text-gray-400 hover:text-teal-600">
