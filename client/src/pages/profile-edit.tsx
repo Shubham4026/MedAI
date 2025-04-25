@@ -366,7 +366,7 @@ export default function ProfileEdit() {
             <div className="space-y-6">
               {/* Allergies */}
               <div className="space-y-2">
-                <Label>Allergies</Label>
+                <Label className="mb-2">Allergies</Label>
                 <div className="flex gap-2">
                   <Input
                     value={newAllergy}
@@ -409,7 +409,7 @@ export default function ProfileEdit() {
 
               {/* Medications */}
               <div className="space-y-2">
-                <Label>Current Medications</Label>
+                <Label className="mb-2">Current Medications</Label>
                 <div className="flex gap-2">
                   <Input
                     value={newMedication}
@@ -452,7 +452,7 @@ export default function ProfileEdit() {
 
               {/* Medical Conditions */}
               <div className="space-y-2">
-                <Label>Medical Conditions</Label>
+                <Label className="mb-2">Medical Conditions</Label>
                 <div className="flex gap-2">
                   <Input
                     value={newCondition}
@@ -496,92 +496,276 @@ export default function ProfileEdit() {
               {/* --- NEW FIELDS FROM SCHEMA --- */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                 {/* Lifestyle & Diet */}
-                <div>
-                  <Label>Diet Type</Label>
-                  <Input value={profile.dietType || ''} onChange={e => setProfile(p => ({...p, dietType: e.target.value}))} placeholder="e.g. Vegetarian, Vegan, etc." />
-                  <Label className="mt-2">Daily Caloric Intake</Label>
-                  <Input type="number" value={profile.dailyCaloricIntake || ''} onChange={e => setProfile(p => ({...p, dailyCaloricIntake: Number(e.target.value)}))} placeholder="Calories" />
-                  <Label className="mt-2">Water Intake (liters)</Label>
-                  <Input type="number" value={profile.waterIntakeLiters || ''} onChange={e => setProfile(p => ({...p, waterIntakeLiters: Number(e.target.value)}))} placeholder="Liters" />
-                  <Label className="mt-2">Activity Level</Label>
-                  <Input value={profile.activityLevel || ''} onChange={e => setProfile(p => ({...p, activityLevel: e.target.value}))} placeholder="e.g. Sedentary, Active" />
-                  <Label className="mt-2">Exercise Frequency</Label>
-                  <Input value={profile.exerciseFrequency || ''} onChange={e => setProfile(p => ({...p, exerciseFrequency: e.target.value}))} placeholder="e.g. 3x/week" />
-                  <Label className="mt-2">Step Count (Avg Daily)</Label>
-                  <Input type="number" value={profile.stepCountAvgDaily || ''} onChange={e => setProfile(p => ({...p, stepCountAvgDaily: Number(e.target.value)}))} placeholder="Steps" />
-                </div>
+                <div className="space-y-4 bg-gray-50 p-6 rounded-lg shadow-sm">
+  <h3 className="text-lg font-semibold mb-4">Lifestyle & Diet</h3>
+  {/* Diet Type */}
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Diet Type</Label>
+    <Select value={profile.dietType || ''} onValueChange={value => setProfile(p => ({...p, dietType: value}))}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select diet type" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Omnivore">Omnivore</SelectItem>
+        <SelectItem value="Vegetarian">Vegetarian</SelectItem>
+        <SelectItem value="Vegan">Vegan</SelectItem>
+        <SelectItem value="Pescatarian">Pescatarian</SelectItem>
+        <SelectItem value="Keto">Keto</SelectItem>
+        <SelectItem value="Paleo">Paleo</SelectItem>
+        <SelectItem value="Other">Other</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+  {/* Daily Caloric Intake */}
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Daily Caloric Intake</Label>
+    <Input type="number" value={profile.dailyCaloricIntake || ''} onChange={e => setProfile(p => ({...p, dailyCaloricIntake: Number(e.target.value)}))} placeholder="Calories" />
+  </div>
+  {/* Water Intake */}
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Water Intake (liters)</Label>
+    <Input type="number" value={profile.waterIntakeLiters || ''} onChange={e => setProfile(p => ({...p, waterIntakeLiters: Number(e.target.value)}))} placeholder="Liters" />
+  </div>
+  {/* Activity Level */}
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Activity Level</Label>
+    <Select value={profile.activityLevel || ''} onValueChange={value => setProfile(p => ({...p, activityLevel: value}))}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select activity level" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Sedentary">Sedentary</SelectItem>
+        <SelectItem value="Lightly Active">Lightly Active</SelectItem>
+        <SelectItem value="Active">Active</SelectItem>
+        <SelectItem value="Very Active">Very Active</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+  {/* Exercise Frequency */}
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Exercise Frequency</Label>
+    <Select value={profile.exerciseFrequency || ''} onValueChange={value => setProfile(p => ({...p, exerciseFrequency: value}))}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select frequency" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Rarely">Rarely</SelectItem>
+        <SelectItem value="1-2x/week">1-2x/week</SelectItem>
+        <SelectItem value="3-4x/week">3-4x/week</SelectItem>
+        <SelectItem value="5+ times/week">5+ times/week</SelectItem>
+        <SelectItem value="Daily">Daily</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+  {/* Step Count */}
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Step Count (Avg Daily)</Label>
+    <Input type="number" value={profile.stepCountAvgDaily || ''} onChange={e => setProfile(p => ({...p, stepCountAvgDaily: Number(e.target.value)}))} placeholder="Steps" />
+  </div>
+</div>
                 {/* Vitals & Biometrics */}
-                <div>
-                  <Label>Blood Pressure</Label>
-                  <Input value={profile.bloodPressure || ''} onChange={e => setProfile(p => ({...p, bloodPressure: e.target.value}))} placeholder="e.g. 120/80" />
-                  <Label className="mt-2">Heart Rate</Label>
-                  <Input type="number" value={profile.heartRate || ''} onChange={e => setProfile(p => ({...p, heartRate: Number(e.target.value)}))} placeholder="bpm" />
-                  <Label className="mt-2">Respiratory Rate</Label>
-                  <Input type="number" value={profile.respiratoryRate || ''} onChange={e => setProfile(p => ({...p, respiratoryRate: Number(e.target.value)}))} placeholder="breaths/min" />
-                  <Label className="mt-2">Body Temperature (°C)</Label>
-                  <Input type="number" value={profile.bodyTemperature || ''} onChange={e => setProfile(p => ({...p, bodyTemperature: Number(e.target.value)}))} placeholder="°C" />
-                  <Label className="mt-2">Blood Sugar Level</Label>
-                  <Input type="number" value={profile.bloodSugarLevel || ''} onChange={e => setProfile(p => ({...p, bloodSugarLevel: Number(e.target.value)}))} placeholder="mg/dL" />
-                  <Label className="mt-2">Cholesterol Level</Label>
-                  <Input type="number" value={profile.cholesterolLevel || ''} onChange={e => setProfile(p => ({...p, cholesterolLevel: Number(e.target.value)}))} placeholder="mg/dL" />
-                </div>
+                <div className="space-y-4 bg-gray-50 p-6 rounded-lg shadow-sm">
+  <h3 className="text-lg font-semibold mb-4">Environmental & Social</h3>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Blood Pressure</Label>
+    <Input value={profile.bloodPressure || ''} onChange={e => setProfile(p => ({...p, bloodPressure: e.target.value}))} placeholder="e.g. 120/80" />
+  </div>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Heart Rate</Label>
+    <Input type="number" value={profile.heartRate || ''} onChange={e => setProfile(p => ({...p, heartRate: Number(e.target.value)}))} placeholder="bpm" />
+  </div>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Respiratory Rate</Label>
+    <Input type="number" value={profile.respiratoryRate || ''} onChange={e => setProfile(p => ({...p, respiratoryRate: Number(e.target.value)}))} placeholder="breaths/min" />
+  </div>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Body Temperature (°C)</Label>
+    <Input type="number" value={profile.bodyTemperature || ''} onChange={e => setProfile(p => ({...p, bodyTemperature: Number(e.target.value)}))} placeholder="°C" />
+  </div>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Blood Sugar Level</Label>
+    <Input type="number" value={profile.bloodSugarLevel || ''} onChange={e => setProfile(p => ({...p, bloodSugarLevel: Number(e.target.value)}))} placeholder="mg/dL" />
+  </div>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Cholesterol Level</Label>
+    <Input type="number" value={profile.cholesterolLevel || ''} onChange={e => setProfile(p => ({...p, cholesterolLevel: Number(e.target.value)}))} placeholder="mg/dL" />
+  </div>
+</div>
               </div>
 
               {/* Mental Health & Sleep */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div className="space-y-4 bg-gray-50 p-6 rounded-lg shadow-sm">
+  <h3 className="text-lg font-semibold mb-4">Environmental & Social</h3>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Stress Level (1-10)</Label>
+    <Select value={profile.stressLevel?.toString() || ''} onValueChange={value => setProfile(p => ({...p, stressLevel: Number(value)}))}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select stress level" />
+      </SelectTrigger>
+      <SelectContent>
+        {[...Array(10)].map((_, i) => (
+          <SelectItem key={i+1} value={(i+1).toString()}>{i+1}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Sleep Quality</Label>
+    <Select value={profile.sleepQuality || ''} onValueChange={value => setProfile(p => ({...p, sleepQuality: value}))}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select sleep quality" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Excellent">Excellent</SelectItem>
+        <SelectItem value="Good">Good</SelectItem>
+        <SelectItem value="Fair">Fair</SelectItem>
+        <SelectItem value="Poor">Poor</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Hours of Sleep</Label>
+    <Input type="number" value={profile.hoursOfSleep || ''} onChange={e => setProfile(p => ({...p, hoursOfSleep: Number(e.target.value)}))} placeholder="Hours" />
+  </div>
+</div>
                 <div>
-                  <Label>Stress Level (1-10)</Label>
-                  <Input type="number" value={profile.stressLevel || ''} min={1} max={10} onChange={e => setProfile(p => ({...p, stressLevel: Number(e.target.value)}))} placeholder="1-10" />
-                  <Label className="mt-2">Sleep Quality</Label>
-                  <Input value={profile.sleepQuality || ''} onChange={e => setProfile(p => ({...p, sleepQuality: e.target.value}))} placeholder="e.g. Good, Poor" />
-                  <Label className="mt-2">Hours of Sleep</Label>
-                  <Input type="number" value={profile.hoursOfSleep || ''} onChange={e => setProfile(p => ({...p, hoursOfSleep: Number(e.target.value)}))} placeholder="Hours" />
-                </div>
-                <div>
-                  <Label>Mental Health Issues (comma separated)</Label>
+                  <Label className="mb-2">Mental Health Issues (comma separated)</Label>
                   <Input value={(profile.mentalHealthIssues || []).join(', ')} onChange={e => setProfile(p => ({...p, mentalHealthIssues: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. Anxiety, Depression" />
                 </div>
               </div>
 
               {/* Environmental & Social */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div className="space-y-4 bg-gray-50 p-6 rounded-lg shadow-sm">
+  <h3 className="text-lg font-semibold mb-4">Environmental & Social</h3>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Occupation Type</Label>
+    <Select value={profile.occupationType || ''} onValueChange={value => setProfile(p => ({...p, occupationType: value}))}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select occupation type" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Office">Office</SelectItem>
+        <SelectItem value="Field">Field</SelectItem>
+        <SelectItem value="Student">Student</SelectItem>
+        <SelectItem value="Healthcare">Healthcare</SelectItem>
+        <SelectItem value="Unemployed">Unemployed</SelectItem>
+        <SelectItem value="Retired">Retired</SelectItem>
+        <SelectItem value="Other">Other</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Exposure to Pollution</Label>
+    <Select value={profile.exposureToPollution || ''} onValueChange={value => setProfile(p => ({...p, exposureToPollution: value}))}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select exposure" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Low">Low</SelectItem>
+        <SelectItem value="Moderate">Moderate</SelectItem>
+        <SelectItem value="High">High</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+  <div className="flex flex-col gap-1">
+    <Label className="mb-1">Social Connections</Label>
+    <Select value={profile.socialConnections || ''} onValueChange={value => setProfile(p => ({...p, socialConnections: value}))}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select social connections" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Strong">Strong</SelectItem>
+        <SelectItem value="Moderate">Moderate</SelectItem>
+        <SelectItem value="Weak">Weak</SelectItem>
+        <SelectItem value="Isolated">Isolated</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+</div>
                 <div>
-                  <Label>Occupation Type</Label>
-                  <Input value={profile.occupationType || ''} onChange={e => setProfile(p => ({...p, occupationType: e.target.value}))} placeholder="e.g. Office, Field" />
-                  <Label className="mt-2">Exposure to Pollution</Label>
-                  <Input value={profile.exposureToPollution || ''} onChange={e => setProfile(p => ({...p, exposureToPollution: e.target.value}))} placeholder="e.g. High, Low" />
-                  <Label className="mt-2">Social Connections</Label>
-                  <Input value={profile.socialConnections || ''} onChange={e => setProfile(p => ({...p, socialConnections: e.target.value}))} placeholder="e.g. Strong, Weak" />
-                </div>
-                <div>
-                  <Label>Vaccination History (comma separated)</Label>
-                  <Input value={(profile.vaccinationHistory || []).join(', ')} onChange={e => setProfile(p => ({...p, vaccinationHistory: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. COVID-19, Tetanus" />
-                  <Label className="mt-2">Screenings Done (comma separated)</Label>
-                  <Input value={(profile.screeningsDone || []).join(', ')} onChange={e => setProfile(p => ({...p, screeningsDone: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. Mammogram, Colonoscopy" />
+                  <Label className="mb-2">Vaccination History</Label>
+                  <Select
+                    multiple
+                    value={profile.vaccinationHistory || []}
+                    onValueChange={vals => setProfile(p => ({...p, vaccinationHistory: vals}))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select vaccinations" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="COVID-19">COVID-19</SelectItem>
+                      <SelectItem value="Tetanus">Tetanus</SelectItem>
+                      <SelectItem value="Hepatitis B">Hepatitis B</SelectItem>
+                      <SelectItem value="Influenza">Influenza</SelectItem>
+                      <SelectItem value="MMR">MMR</SelectItem>
+                      <SelectItem value="Polio">Polio</SelectItem>
+                      <SelectItem value="Varicella">Varicella</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    className="mt-2"
+                    value={profile.vaccinationHistory?.filter(opt => !["COVID-19","Tetanus","Hepatitis B","Influenza","MMR","Polio","Varicella"].includes(opt)).join(', ')}
+                    onChange={e => setProfile(p => ({...p, vaccinationHistory: [
+                      ...((p.vaccinationHistory||[]).filter(opt => ["COVID-19","Tetanus","Hepatitis B","Influenza","MMR","Polio","Varicella"].includes(opt))),
+                      ...e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                    ]}))}
+                    placeholder="Other vaccinations (comma separated)"
+                  />
+
+                  <Label className="mb-2 mt-2">Screenings Done</Label>
+                  <Select
+                    multiple
+                    value={profile.screeningsDone || []}
+                    onValueChange={vals => setProfile(p => ({...p, screeningsDone: vals}))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select screenings" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Mammogram">Mammogram</SelectItem>
+                      <SelectItem value="Colonoscopy">Colonoscopy</SelectItem>
+                      <SelectItem value="Pap Smear">Pap Smear</SelectItem>
+                      <SelectItem value="Blood Pressure">Blood Pressure</SelectItem>
+                      <SelectItem value="Cholesterol">Cholesterol</SelectItem>
+                      <SelectItem value="Diabetes">Diabetes</SelectItem>
+                      <SelectItem value="Prostate">Prostate</SelectItem>
+                      <SelectItem value="Vision">Vision</SelectItem>
+                      <SelectItem value="Hearing">Hearing</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    className="mt-2"
+                    value={profile.screeningsDone?.filter(opt => !["Mammogram","Colonoscopy","Pap Smear","Blood Pressure","Cholesterol","Diabetes","Prostate","Vision","Hearing"].includes(opt)).join(', ')}
+                    onChange={e => setProfile(p => ({...p, screeningsDone: [
+                      ...((p.screeningsDone||[]).filter(opt => ["Mammogram","Colonoscopy","Pap Smear","Blood Pressure","Cholesterol","Diabetes","Prostate","Vision","Hearing"].includes(opt))),
+                      ...e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                    ]}))}
+                    placeholder="Other screenings (comma separated)"
+                  />
                 </div>
               </div>
 
-              {/* Derived/Calculated Fields (read-only or optional) */}
+              {/* Derived/Calculated Fields (read-only, not editable) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                 <div>
-                  <Label>BMI</Label>
-                  <Input type="number" value={profile.bmi || ''} onChange={e => setProfile(p => ({...p, bmi: Number(e.target.value)}))} placeholder="Auto or manual" />
-                  <Label className="mt-2">BMI Category</Label>
-                  <Input value={profile.bmiCategory || ''} onChange={e => setProfile(p => ({...p, bmiCategory: e.target.value}))} placeholder="e.g. Normal, Overweight" />
-                  <Label className="mt-2">Health Score</Label>
-                  <Input type="number" value={profile.healthScore || ''} onChange={e => setProfile(p => ({...p, healthScore: Number(e.target.value)}))} placeholder="Auto or manual" />
-                  <Label className="mt-2">Risk Flags (comma separated)</Label>
-                  <Input value={(profile.riskFlags || []).join(', ')} onChange={e => setProfile(p => ({...p, riskFlags: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. High BP, Diabetes" />
+                  <Label className="mb-2">BMI</Label>
+                  <Input type="number" value={profile.bmi ?? ''} readOnly disabled placeholder="Auto-calculated" />
+                  <Label className="mb-2 mt-2">BMI Category</Label>
+                  <Input value={profile.bmiCategory ?? ''} readOnly disabled placeholder="Auto-calculated" />
+                  <Label className="mb-2 mt-2">Health Score</Label>
+                  <Input type="number" value={profile.healthScore ?? ''} readOnly disabled placeholder="Auto-calculated" />
+                  <Label className="mb-2 mt-2">Risk Flags</Label>
+                  <Input value={(profile.riskFlags || []).join(', ')} readOnly disabled placeholder="Auto-calculated" />
                 </div>
                 <div>
-                  <Label>Nutritional Deficiencies (comma separated)</Label>
+                  <Label className="mb-2">Nutritional Deficiencies (comma separated)</Label>
                   <Input value={(profile.nutritionalDeficiencies || []).join(', ')} onChange={e => setProfile(p => ({...p, nutritionalDeficiencies: e.target.value.split(',').map(s => s.trim()).filter(Boolean)}))} placeholder="e.g. Vitamin D, Iron" />
-                  <Label className="mt-2">Recent Lab Results (JSON)</Label>
+                  {/* <Label className="mb-2 mt-2">Recent Lab Results (JSON)</Label>
                   <Textarea value={JSON.stringify(profile.recentLabResults || {}, null, 2)} onChange={e => {
-                    try {
                       setProfile(p => ({...p, recentLabResults: JSON.parse(e.target.value)}));
-                    } catch {}
-                  }} placeholder='{"glucose": 95, "cholesterol": 180}' />
+                    }} placeholder='{"glucose": 95, "cholesterol": 180}' /> */}
                 </div>
               </div>
             </div>
