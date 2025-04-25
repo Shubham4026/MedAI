@@ -25,7 +25,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
   
   // Google OAuth routes
-  app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+  app.get("/auth/google", passport.authenticate("google", { scope: [
+    'profile',
+    'email',
+    'https://www.googleapis.com/auth/fitness.activity.read',
+    'https://www.googleapis.com/auth/fitness.heart_rate.read'
+  ] }));
 
   app.get("/auth/google/callback", passport.authenticate("google", {
     failureRedirect: "/login", // Adjust to your frontend login route

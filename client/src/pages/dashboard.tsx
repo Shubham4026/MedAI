@@ -109,6 +109,12 @@ export default function Dashboard() {
                   <Siren className="h-6 w-6" />
                   <span className="hidden sm:inline">Emergency</span>
                 </Button>
+                <Button asChild variant="ghost" className="flex items-center space-x-2" title="Health Metrics">
+                  <Link href="/health-metrics">
+                    <TrendingUp className="h-6 w-6 text-gray-600" />
+                    <span className="hidden sm:inline">Health Metrics</span>
+                  </Link>
+                </Button>
               </div>
 
               {/* Notifications */}
@@ -226,6 +232,7 @@ export default function Dashboard() {
                 </div>
               </Card>
 
+              <Link href="/health-metrics">
               <Card className="p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-4">
                   <div className="bg-green-100 p-3 rounded-full">
@@ -237,6 +244,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               </Card>
+              </Link>
             </div>
           </div>
 
