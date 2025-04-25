@@ -48,7 +48,7 @@ export type User = typeof users.$inferSelect;
 
 export const healthProfiles = pgTable("health_profiles", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id").notNull().references(() => users.id).unique(),
 
   // Basic Info
   age: integer("age"),

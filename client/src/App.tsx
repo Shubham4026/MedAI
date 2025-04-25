@@ -18,6 +18,7 @@ const NearbyHospitalsPage = lazy(() => import("@/pages/nearby-hospitals"));
 const DietPlan = lazy(() => import("@/pages/DietPlan"));
 const HealthMetrics = lazy(() => import("@/pages/health-metrics"));
 const FindDrugs = lazy(() => import("@/pages/find-drugs"));
+const ScanReport = lazy(() => import("@/pages/scanReport"));
 
 import { HeartPulse } from "lucide-react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
@@ -71,6 +72,7 @@ function Router() {
         <ProtectedRoute path="/voice-assistant" component={VoiceAssistant} />
         <ProtectedRoute path="/profile" component={Profile} />
         <ProtectedRoute path="/profile/edit" component={ProfileEdit} />
+        <ProtectedRoute path="/scan-report" component={ScanReport} />
         <WouterRoute path="/pricing" component={Pricing} />
         <WouterRoute path="/contact" component={Contact} />
         <WouterRoute path="/faq" component={FAQ} />

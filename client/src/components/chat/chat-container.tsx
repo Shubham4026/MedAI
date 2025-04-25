@@ -3,12 +3,13 @@ import { MessageBubble } from './message-bubble';
 import { ThinkingBubble } from './thinking-bubble';
 import { ChatInput } from './chat-input';
 import { AnalysisResponse } from './analysis-response';
-import { useConversation } from '@/lib/hooks';
+import { useConversation, useConversations } from '@/lib/hooks';
 import { Message } from '@/lib/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { fetchWithAuth } from '@/lib/fetchWithAuth';
+import { useLocation } from 'wouter'; 
+import { useAuth } from '@/hooks/use-auth'; 
 
 interface ChatContainerProps {
   conversationId?: number;
@@ -16,54 +17,53 @@ interface ChatContainerProps {
 
 export function ChatContainer({ conversationId }: ChatContainerProps) {
   const { messages, isLoading, sendMessage, isPending } = useConversation(conversationId);
+  const { createConversation, isPending: isCreatingConversation } = useConversations();
+  const { user } = useAuth(); 
+  const [, setLocation] = useLocation(); 
   const [pendingUserMessage, setPendingUserMessage] = React.useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages, isPending]);
-
-  // Track if title has been updated for this conversation
-  const titleUpdatedRef = React.useRef<Record<number, boolean>>({});
-
-  const queryClient = useQueryClient();
+  }, [messages, isPending, isCreatingConversation]);
 
   const handleSendMessage = async (content: string) => {
-    setPendingUserMessage(content);
-    sendMessage(content);
+    if (!user) {
+      console.error("User not logged in, cannot send message or create conversation.");
+      return; 
+    }
 
-    // Only update title for first user message in this conversation
-    if (
-      conversationId &&
-      !titleUpdatedRef.current[conversationId] &&
-      messages?.filter((m) => m.role === "user").length === 0
-    ) {
-      // Summarize (truncate) the message for the title
-      const summary = content.length > 48 ? content.slice(0, 48) + "..." : content;
-      try {
-        await fetchWithAuth(`/api/conversations/${conversationId}/title`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: summary })
-        });
-        titleUpdatedRef.current[conversationId] = true;
-        // Invalidate the conversations query so the sidebar updates
-        queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
-      } catch (e) {
-        // Optionally handle error
-        // console.error('Failed to update conversation title', e);
-      }
+    const userId = user.id;
+
+    setPendingUserMessage(content);
+
+    if (conversationId) {
+      sendMessage(content);
+    } else {
+      createConversation(
+        { userId, initialMessageContent: content },
+        {
+          onSuccess: (newConversation) => {
+            setLocation(`/chat/${newConversation.id}`);
+          },
+          onError: (error) => {
+            console.error("Failed to create conversation:", error);
+            setPendingUserMessage(null); 
+          }
+        }
+      );
     }
   };
 
-  // Clear pending message when not sending
   React.useEffect(() => {
-    if (!isPending) setPendingUserMessage(null);
-  }, [isPending]);
+    if (!isPending && !isCreatingConversation) {
+      setPendingUserMessage(null);
+    }
+  }, [isPending, isCreatingConversation]);
 
+  const isProcessing = isPending || isCreatingConversation;
 
   return (
     <div className="flex-grow flex flex-col bg-white">
@@ -135,12 +135,12 @@ export function ChatContainer({ conversationId }: ChatContainerProps) {
           )}
 
           {/* Loading state */}
-          <ThinkingBubble isVisible={isPending} />
+          <ThinkingBubble isVisible={isProcessing} />
         </div>
       </div>
 
       {/* Chat Input */}
-      <ChatInput onSend={handleSendMessage} isDisabled={isPending} />
+      <ChatInput onSend={handleSendMessage} isDisabled={isProcessing} />
     </div>
   );
 }

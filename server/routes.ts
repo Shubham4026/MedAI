@@ -2,8 +2,8 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import passport from "passport";
 import { storage } from "./storage";
-// Import from the direct Gemini service
-import { analyzeSymptoms } from "./services/gemini-direct";
+// Import from the direct OpenAI service
+import { analyzeSymptoms } from "./services/openai";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { setupAuth } from "./auth";
 import { fetchHospitalsFromGoogle } from "./services/googleHospitals";
@@ -101,6 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     try {
       const userId = req.user!.id;
+      console.log("[SHUBHAM] /api/health-profile called", { userId, body: req.body });
       const updates = { ...req.body };
       // Calculate age if dateOfBirth is provided
       if (updates.dateOfBirth) {
@@ -209,14 +210,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new conversation - requires authentication
   app.post("/api/conversations", isAuthenticated, async (req, res) => {
     try {
-      console.log("conversations", req.body);
-      const data = insertConversationSchema.parse(req.body);
-      const conversation = await storage.createConversation(data);
-      res.json(conversation);
-    } catch (error: any) {
-      res.status(400).json({ message: `Invalid request: ${error?.message || "Unknown error"}` });
-    }
-  });
+      console.log("POST /api/conversations", { body: req.body, user: req.user });
+
+      const { title, initialMessageContent } = req.body;
+      const userId = req.user!.id;
+
+      // Validate optional initialMessageContent
+      if (initialMessageContent !== undefined && typeof initialMessageContent !== 'string') {
+        return res.status(400).json({ message: "Invalid 'initialMessageContent' format, must be a string." });
+      }
+
+      // Use provided title or generate a default one
+      const conversationTitle = title || 
+                                (initialMessageContent ? initialMessageContent.substring(0, 50) + (initialMessageContent.length > 50 ? '...' : '') : "New Conversation");
+
+      // Create the conversation record
+      const conversationData = { title: conversationTitle, userId }; 
+      // Ensure this matches what storage.createConversation expects - likely just {title, userId}
+      const newConversation = await storage.createConversation(conversationData);
+
+      // Create the initial message IF content was provided and is not empty
+      if (initialMessageContent && typeof initialMessageContent === 'string' && initialMessageContent.trim().length > 0) {
+        try {
+          await storage.createMessage({
+            conversationId: newConversation.id,
+            role: "user",
+            content: initialMessageContent.trim(),
+          });
+          console.log(`Initial message created for conversation ${newConversation.id}`);
+        } catch (messageError: any) {
+          console.error(`Error creating initial message for conversation ${newConversation.id}:`, messageError);
+          // Logged the error, but proceed to return the created conversation
+        }
+      }
+
+      // Respond with the newly created conversation object and 201 status
+      res.status(201).json(newConversation); 
+
+     } catch (error: any) {
+      // Handle validation errors (e.g., if title was required by DB/schema but not provided and no default generated)
+      console.error("Error in POST /api/conversations:", error);
+      if (error.errors) { // Check for Zod errors if you were parsing
+        return res.status(400).json({ message: "Invalid request data.", details: error.errors });
+      }
+      res.status(500).json({ message: `Server error: ${error?.message || "Unknown error"}` });
+     }
+   });
 
   // Get all conversations
   app.get("/api/conversations", async (req, res) => {
@@ -273,6 +312,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If this is a user message, process it with OpenAI
       if (data.role === "user") {
+        // Ensure user is authenticated for this operation
+        if (!req.isAuthenticated() || !req.user) {
+          console.error("User not authenticated for symptom analysis");
+          return res.status(401).json({ message: "Authentication required for symptom analysis." });
+        }
+        const userId = req.user!.id;
+
+        // Fetch Health Profile
+        let healthProfileContext = "";
+        try {
+          const profile = await storage.getHealthProfile(userId);
+          if (profile) {
+            // Format profile into plain text, skipping null/empty values
+            const profileSummaryLines: string[] = [];
+            for (const [key, value] of Object.entries(profile)) {
+              // Skip id, userId, lastUpdated, and internal flags like healthScore, riskFlags, bmiCategory
+              if (['id', 'userId', 'lastUpdated', 'healthScore', 'riskFlags', 'bmiCategory'].includes(key)) continue;
+
+              let line = '';
+              if (value !== null && value !== undefined) {
+                if (Array.isArray(value)) {
+                  if (value.length > 0) {
+                    // Capitalize first letter of key for display
+                    const displayKey = key.charAt(0).toUpperCase() + key.slice(1);
+                    line = `${displayKey}: ${value.join(', ')}`;
+                  } else {
+                    // Optional: Indicate empty arrays explicitly or just skip
+                    // line = `${key.charAt(0).toUpperCase() + key.slice(1)}: None`;
+                  }
+                } else if (typeof value === 'object' && Object.keys(value).length > 0) {
+                    // Handle simple objects like lifestyleHabits, recentLabResults
+                    const displayKey = key.charAt(0).toUpperCase() + key.slice(1);
+                    const details = Object.entries(value).map(([k, v]) => `${k}: ${v}`).join(', ');
+                    line = `${displayKey}: ${details}`;
+                } else if (String(value).trim() !== '') {
+                   const displayKey = key.charAt(0).toUpperCase() + key.slice(1);
+                   // Add units where appropriate based on key
+                   let displayValue = String(value);
+                   if (key === 'height') displayValue += ' cm';
+                   if (key === 'weight') displayValue += ' kg';
+                   if (key === 'waterIntakeLiters') displayValue += ' L';
+                   if (key === 'bodyTemperature') displayValue += ' °C'; // Assuming Celsius
+                   // ... add more units as needed ...
+                   line = `${displayKey}: ${displayValue}`;
+                }
+              }
+              if (line) {
+                profileSummaryLines.push(line);
+              }
+            }
+            
+            if (profileSummaryLines.length > 0) {
+                healthProfileContext = "User Health Profile:\n" + profileSummaryLines.join('\n');
+            } else {
+                healthProfileContext = "User health profile is available but contains no filled details.";
+            }
+
+          } else {
+            healthProfileContext = "User health profile not found.";
+          }
+        } catch (profileError) {
+          console.error(`Error fetching health profile for user ${userId}:`, profileError);
+          healthProfileContext = "Error fetching user health profile."; // Inform AI about the error
+        }
+
         // Get all messages in this conversation for context
         const conversationMessages = await storage.getMessagesByConversationId(conversationId);
         
@@ -282,53 +386,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
           content: msg.content
         }));
         
+        let responseMessage: any = null; 
+        let responseSent = false; 
+
         try {
-          console.log("Analyzing symptoms:", data.content);
-          // Analyze symptoms using Gemini
-          const analysis = await analyzeSymptoms(data.content, conversationHistory);
+          console.log("Analyzing symptoms with context:", data.content, healthProfileContext);
+          // Analyze symptoms using OpenAI, now passing health profile context
+          const analysis = await analyzeSymptoms(data.content, conversationHistory, healthProfileContext); // Pass profile context
           console.log("Analysis received:", JSON.stringify(analysis, null, 2));
-          
+
+          // Determine the content for the assistant's message, ensuring it's a string
+          let assistantContent: string;
+          if (analysis && typeof analysis.message === 'string' && analysis.message.length > 0) {
+              assistantContent = analysis.message;
+          } else if (analysis && typeof (analysis as any).error === 'string') {
+              // Handle the unexpected { "error": "..." } structure
+              assistantContent = `Analysis failed: ${(analysis as any).error}`;
+          } else {
+              // Fallback if the structure is completely unexpected or message is empty
+              assistantContent = "Sorry, an unexpected error occurred during analysis, or the response was empty.";
+              console.error("Unexpected analysis result structure or empty message:", analysis);
+          }
+
           // Save the AI's response as a message
-          const responseMessage = await storage.createMessage({
+          responseMessage = await storage.createMessage({
             conversationId,
             role: "assistant",
-            content: analysis.message
+            content: assistantContent 
           });
-          
-          // Save the analysis results
-          await storage.createAnalysis({
-            conversationId,
-            messageId: responseMessage.id,
-            urgencyLevel: analysis.urgency,
-            conditions: analysis.conditions,
-            suggestions: analysis.suggestions
-          });
-          
-          // Return both the message and analysis
-          return res.json({
-            message: responseMessage,
-            analysis: {
-              urgencyLevel: analysis.urgency,
-              conditions: analysis.conditions,
-              suggestions: analysis.suggestions,
-              followUpQuestion: analysis.followUpQuestion
+
+          // Save the analysis results only if the analysis object has the expected structure
+          if (analysis && typeof analysis.urgency === 'string' && Array.isArray(analysis.conditions) && Array.isArray(analysis.suggestions)) { 
+            try {
+              await storage.createAnalysis({
+                conversationId,
+                messageId: responseMessage.id,
+                urgencyLevel: analysis.urgency,
+                conditions: analysis.conditions, 
+                suggestions: analysis.suggestions 
+              });
+            } catch (analysisSaveError) {
+              console.error("Error saving analysis details:", analysisSaveError);
+              // Decide if you want to surface this error to the user or just log it
+              // For now, just logging it, as the primary message was saved.
             }
-          });
-        } catch (aiError: any) {
-          console.error("AI analysis error:", aiError);
-          
-          // Still return the user message but with an error
-          return res.status(500).json({
-            message,
-            error: `Failed to analyze symptoms: ${aiError?.message || "Unknown error"}`
-          });
+          } else {
+            console.warn("Analysis result structure missing expected fields, skipping analysis saving. Analysis:", analysis);
+          }
+
+        } catch (aiError: any) { 
+            console.error("AI analysis or initial saving error:", aiError);
+            if (!responseSent) { 
+                 res.status(500).json({ message: `Failed to process message: ${aiError?.message || "Unknown error"}` });
+                 responseSent = true; 
+            }
         }
+
+        // Send success response ONLY if no error response was sent
+        if (!responseSent && responseMessage) {
+             res.json(responseMessage);
+             responseSent = true; 
+        }
+        // If responseMessage is null (e.g., error before it was created) and no error response sent, send generic error
+        else if (!responseSent) {
+             console.error("Failed to generate a response message and no specific error was caught.");
+             res.status(500).json({ message: "Failed to generate a response." });
+             responseSent = true;
+        }
+
       }
       
-      // For non-user messages, just return the message
-      res.json({ message });
-    } catch (error: any) {
-      res.status(400).json({ message: `Invalid request: ${error?.message || "Unknown error"}` });
+      // If it was not a user message (e.g. initial system message?), just return the saved message
+      else {
+         res.json(message);
+      }
+
+    } catch (error: any) { 
+      console.error("General message processing error:", error);
+      // Ensure a response is sent even for non-AI errors
+      if (!res.headersSent) {
+          res.status(400).json({ message: `Bad request: ${error?.message || "Invalid input"}` });
+      }
     }
   });
 
