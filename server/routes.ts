@@ -1,5 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
+import passport from "passport";
 import { storage } from "./storage";
 // Import from the direct Gemini service
 import { analyzeSymptoms } from "./services/gemini-direct";
@@ -23,6 +24,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
   
+  // Google OAuth routes
+  app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+  app.get("/auth/google/callback", passport.authenticate("google", {
+    failureRedirect: "/login", // Adjust to your frontend login route
+    session: true
+  }), (req, res) => {
+    // On success, redirect to frontend app (adjust as needed)
+    res.redirect("/");
+  });
+
+  // Logout route for browser-initiated logout
+  app.get("/logout", (req, res, next) => {
+    req.logout((err) => {
+      if (err) return next(err);
+      req.session?.destroy(() => {
+        res.redirect("/login"); // Adjust to your frontend login route
+      });
+    });
+  });
+
   // Hospitals proxy endpoint (no auth required)
   app.get("/api/hospitals", async (req: Request, res: Response) => {
     try {

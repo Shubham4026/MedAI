@@ -39,6 +39,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { useProfileCompletion } from "@/hooks/use-profile-completion";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 function ProfileCompletionBanner() {
   const { completion, loading } = useProfileCompletion();
@@ -79,6 +80,12 @@ export default function Dashboard() {
       setLocation("/auth?mode=login");
     }
   }, [user, setLocation]);
+
+  const handleLogout = async () => {
+    await fetchWithAuth("/api/logout", { method: "POST" });
+    window.location.href = "/auth?mode=login";
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b sticky top-0 z-50">
@@ -128,7 +135,7 @@ export default function Dashboard() {
                       Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">
+                    <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Log out
                     </DropdownMenuItem>

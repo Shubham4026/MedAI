@@ -1,5 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
@@ -77,6 +78,45 @@ export function setupAuth(app: Express) {
       done(error);
     }
   });
+
+  // Google OAuth2 Strategy
+  passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID!,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    callbackURL: "/auth/google/callback",
+  }, async (accessToken, refreshToken, profile, done) => {
+    try {
+      // Use email from Google profile
+      const email = profile.emails?.[0]?.value;
+      if (!email) return done(null, false, { message: "No email from Google" });
+      let user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Create new user
+        user = await storage.createUser({
+          email,
+          firstName: profile.name?.givenName || "",
+          lastName: profile.name?.familyName || "",
+          password: "", // No password for Google users
+        });
+        await storage.createHealthProfile({
+          userId: user.id,
+          age: null,
+          gender: null,
+          height: null,
+          weight: null,
+          bloodType: null,
+          allergies: [],
+          chronicConditions: [],
+          medications: [],
+          familyHistory: [],
+          lifestyleHabits: {}
+        });
+      }
+      return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
+  }));
 
   // API Routes for authentication
   app.post("/api/register", async (req, res, next) => {

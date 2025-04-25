@@ -188,6 +188,25 @@ export default function AuthPage() {
                         Sign In
                       </Button>
                     </form>
+                    <div className="my-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full flex items-center justify-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+                        onClick={() => { window.location.href = '/auth/google'; }}
+                      >
+                        <svg className="w-5 h-5" viewBox="0 0 48 48">
+                          <g>
+                            <path fill="#4285F4" d="M24 9.5c3.54 0 6.44 1.23 8.44 3.26l6.31-6.3C34.62 2.13 29.74 0 24 0 14.82 0 6.95 5.4 2.69 13.32l7.73 6.01C12.14 13.18 17.57 9.5 24 9.5z"/>
+                            <path fill="#34A853" d="M46.1 24.55c0-1.56-.14-3.1-.4-4.55H24v9.13h12.45c-.54 2.9-2.14 5.36-4.57 7.04l7.09 5.52C43.99 37.1 46.1 31.36 46.1 24.55z"/>
+                            <path fill="#FBBC05" d="M10.42 28.34A14.56 14.56 0 019.5 24c0-1.5.26-2.95.72-4.34l-7.73-6.01A23.94 23.94 0 000 24c0 3.85.92 7.5 2.54 10.74l7.88-6.4z"/>
+                            <path fill="#EA4335" d="M24 48c6.48 0 11.92-2.13 15.89-5.8l-7.09-5.52c-1.97 1.32-4.5 2.12-8.8 2.12-6.43 0-11.86-3.68-13.58-8.81l-7.88 6.4C6.95 42.6 14.82 48 24 48z"/>
+                            <path fill="none" d="M0 0h48v48H0z"/>
+                          </g>
+                        </svg>
+                        Sign in with Google
+                      </Button>
+                    </div>
                   </Form>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
@@ -316,6 +335,25 @@ export default function AuthPage() {
                         Create Account
                       </Button>
                     </form>
+                    <div className="my-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full flex items-center justify-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+                        onClick={() => { window.location.href = '/auth/google'; }}
+                      >
+                        <svg className="w-5 h-5" viewBox="0 0 48 48">
+                          <g>
+                            <path fill="#4285F4" d="M24 9.5c3.54 0 6.44 1.23 8.44 3.26l6.31-6.3C34.62 2.13 29.74 0 24 0 14.82 0 6.95 5.4 2.69 13.32l7.73 6.01C12.14 13.18 17.57 9.5 24 9.5z"/>
+                            <path fill="#34A853" d="M46.1 24.55c0-1.56-.14-3.1-.4-4.55H24v9.13h12.45c-.54 2.9-2.14 5.36-4.57 7.04l7.09 5.52C43.99 37.1 46.1 31.36 46.1 24.55z"/>
+                            <path fill="#FBBC05" d="M10.42 28.34A14.56 14.56 0 019.5 24c0-1.5.26-2.95.72-4.34l-7.73-6.01A23.94 23.94 0 000 24c0 3.85.92 7.5 2.54 10.74l7.88-6.4z"/>
+                            <path fill="#EA4335" d="M24 48c6.48 0 11.92-2.13 15.89-5.8l-7.09-5.52c-1.97 1.32-4.5 2.12-8.8 2.12-6.43 0-11.86-3.68-13.58-8.81l-7.88 6.4C6.95 42.6 14.82 48 24 48z"/>
+                            <path fill="none" d="M0 0h48v48H0z"/>
+                          </g>
+                        </svg>
+                        Sign in with Google
+                      </Button>
+                    </div>
                   </Form>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
