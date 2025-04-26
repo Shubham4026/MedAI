@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as GoogleStrategy, Profile, VerifyCallback } from "passport-google-oauth20";
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
@@ -80,11 +80,21 @@ export function setupAuth(app: Express) {
   });
 
   // Google OAuth2 Strategy
+  // Scope for Google Fit API
+  const GOOGLE_SCOPES = [
+    'profile',
+    'email',
+    'https://www.googleapis.com/auth/fitness.activity.read',
+    'https://www.googleapis.com/auth/fitness.heart_rate.read',
+    'https://www.googleapis.com/auth/fitness.body.read'
+  ];
+
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     callbackURL: "/auth/google/callback",
-  }, async (accessToken, refreshToken, profile, done) => {
+    scope: GOOGLE_SCOPES,
+  }, async (accessToken: string, refreshToken: string | undefined, profile: Profile, done: VerifyCallback) => {
     try {
       // Use email from Google profile
       const email = profile.emails?.[0]?.value;
@@ -97,6 +107,9 @@ export function setupAuth(app: Express) {
           firstName: profile.name?.givenName || "",
           lastName: profile.name?.familyName || "",
           password: "", // No password for Google users
+          googleAccessToken: accessToken,
+          googleRefreshToken: refreshToken || null,
+          googleTokenExpiry: new Date(Date.now() + 3600 * 1000), // Token expires in 1 hour
         });
         await storage.createHealthProfile({
           userId: user.id,
@@ -111,6 +124,16 @@ export function setupAuth(app: Express) {
           familyHistory: [],
           lifestyleHabits: {}
         });
+      } else {
+        // Update tokens for existing user
+        await storage.updateUser(user.id, {
+          googleAccessToken: accessToken,
+          googleRefreshToken: refreshToken || null,
+          googleTokenExpiry: new Date(Date.now() + 3600 * 1000) // Token expires in 1 hour
+        });
+        user.googleAccessToken = accessToken;
+        user.googleRefreshToken = refreshToken || null;
+        user.googleTokenExpiry = new Date(Date.now() + 3600 * 1000);
       }
       return done(null, user);
     } catch (err) {

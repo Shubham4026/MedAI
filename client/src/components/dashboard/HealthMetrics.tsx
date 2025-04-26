@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Heart, Flame, Timer } from 'lucide-react';
+import { Activity, Heart, Flame, Timer, RefreshCw } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import FitnessCharts from './FitnessCharts';
 
 interface FitnessData {
   steps: number;
@@ -14,30 +16,47 @@ interface FitnessData {
   activeMinutes: number;
 }
 
-const HealthMetrics: React.FC = () => {
+interface HealthMetricsProps {
+  className?: string;
+}
+
+const HealthMetrics: React.FC<HealthMetricsProps> = ({ className }) => {
   const [fitnessData, setFitnessData] = useState<FitnessData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchFitnessData = async () => {
-      try {
-        const response = await fetch('/api/fitness-data');
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.message || 'Failed to fetch fitness data');
-        }
+  const fetchFitnessData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/fitness-data');
+      if (!response.ok) {
         const data = await response.json();
-        setFitnessData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch fitness data');
-      } finally {
-        setLoading(false);
+        throw new Error(data.message || 'Failed to fetch fitness data');
       }
-    };
-
-    fetchFitnessData();
+      const data = await response.json();
+      setFitnessData(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch fitness data');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchFitnessData();
+
+    // Auto-refresh every 5 minutes
+    const interval = setInterval(() => {
+      fetchFitnessData();
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [fetchFitnessData]);
+
+  const handleRefresh = () => {
+    fetchFitnessData();
+  };
 
   if (loading) {
     return (
@@ -68,7 +87,22 @@ const HealthMetrics: React.FC = () => {
   const stepsProgress = Math.min((steps / stepsGoal) * 100, 100);
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className={className}>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Fitness Overview</h2>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={loading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {/* Steps Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -134,6 +168,15 @@ const HealthMetrics: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+      </div>
+
+      {/* Charts Section */}
+      {fitnessData && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4">Fitness Analytics</h3>
+          <FitnessCharts data={fitnessData} />
+        </div>
+      )}
     </div>
   );
 };

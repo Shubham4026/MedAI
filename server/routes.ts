@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import passport from "passport";
 import { storage } from "./storage";
+import axios from 'axios';
 // Import from the direct OpenAI service
 import { analyzeSymptoms, generatePersonalizedPlan, generateDetailedNutritionPlan } from "./services/openai";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
@@ -74,29 +75,36 @@ function isAuthenticated(req: Request, res: Response, next: NextFunction) {
 const router = Router();
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  console.log("[ROUTES] registerRoutes called");
+  // Create the HTTP server
+  const httpServer = createServer(app);
+
   // Setup authentication
   setupAuth(app);
+  console.log("[ROUTES] registerRoutes called");
   
   // Google OAuth routes
   app.get("/auth/google", passport.authenticate("google", { scope: [
     'profile',
     'email',
     'https://www.googleapis.com/auth/fitness.activity.read',
-    'https://www.googleapis.com/auth/fitness.heart_rate.read'
+    'https://www.googleapis.com/auth/fitness.heart_rate.read',
+    'https://www.googleapis.com/auth/fitness.blood_pressure.read',
+    'https://www.googleapis.com/auth/fitness.body.read',
+    'https://www.googleapis.com/auth/fitness.sleep.read'
   ] }));
 
   app.get("/auth/google/callback", passport.authenticate("google", {
-    failureRedirect: "/login", // Adjust to your frontend login route
+    failureRedirect: '/login',
+    failureMessage: true,
     session: true
-  }), (req, res) => {
-    // On success, redirect to frontend app (adjust as needed)
-    res.redirect("/");
+  }), (req: Request, res: Response) => {
+    res.redirect('/health-metrics');
   });
 
+
   // Logout route for browser-initiated logout
-  app.get("/logout", (req, res, next) => {
-    req.logout((err) => {
+  app.get("/logout", (req: Request, res: Response, next: NextFunction) => {
+    req.logout((err: any) => {
       if (err) return next(err);
       req.session?.destroy(() => {
         res.redirect("/login"); // Adjust to your frontend login route
@@ -132,7 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User routes - protected by authentication middleware
-  app.get("/api/health-profile", isAuthenticated, async (req, res) => {
+  app.get("/api/health-profile", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;
       console.log("[GET] /api/health-profile called", { userId });
@@ -148,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.patch("/api/health-profile", async (req, res) => {
+  app.patch("/api/health-profile", async (req: Request, res: Response) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Not authenticated" });
     }
@@ -181,7 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/health-metrics", isAuthenticated, async (req, res) => {
+  app.get("/api/health-metrics", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;
       const metrics = await storage.getHealthMetrics(userId);
@@ -191,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/health-metrics", isAuthenticated, async (req, res) => {
+  app.post("/api/health-metrics", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;
       const metric = await storage.createHealthMetric({
@@ -205,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // AI-powered autocorrect endpoint
-  app.post("/api/autocorrect", async (req, res) => {
+  app.post("/api/autocorrect", async (req: Request, res: Response) => {
     const { text } = req.body;
     if (!text) {
       return res.status(400).json({ message: "Missing text" });
@@ -238,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API routes for conversations
   
   // Update conversation title - requires authentication
-  app.patch("/api/conversations/:id/title", isAuthenticated, async (req, res) => {
+  app.patch("/api/conversations/:id/title", isAuthenticated, async (req: Request, res: Response) => {
     console.log("[PATCH] /api/conversations/:id/title called", { params: req.params, body: req.body });
     try {
       const id = parseInt(req.params.id);
@@ -261,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new conversation - requires authentication
-  app.post("/api/conversations", isAuthenticated, async (req, res) => {
+  app.post("/api/conversations", isAuthenticated, async (req: Request, res: Response) => {
     try {
       console.log("POST /api/conversations", { body: req.body, user: req.user });
 
@@ -311,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
    });
 
   // Get all conversations
-  app.get("/api/conversations", async (req, res) => {
+  app.get("/api/conversations", async (req: Request, res: Response) => {
     try {
       const userId = req.user && req.user.id;
       if (!userId) {
@@ -325,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get a conversation by ID
-  app.get("/api/conversations/:id", async (req, res) => {
+  app.get("/api/conversations/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const conversation = await storage.getConversation(id);
@@ -341,7 +349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get messages for a conversation
-  app.get("/api/conversations/:id/messages", async (req, res) => {
+  app.get("/api/conversations/:id/messages", async (req: Request, res: Response) => {
     try {
       const conversationId = parseInt(req.params.id);
       const messages = await storage.getMessagesByConversationId(conversationId);
@@ -352,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add a message to a conversation
-  app.post("/api/conversations/:id/messages", async (req, res) => {
+  app.post("/api/conversations/:id/messages", async (req: Request, res: Response) => {
     try {
       const conversationId = parseInt(req.params.id);
       const data = insertMessageSchema.parse({
@@ -525,7 +533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get analyses for a conversation
-  app.get("/api/conversations/:id/analyses", async (req, res) => {
+  app.get("/api/conversations/:id/analyses", async (req: Request, res: Response) => {
     try {
       const conversationId = parseInt(req.params.id);
       const analyses = await storage.getAnalysesByConversationId(conversationId);
@@ -536,7 +544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Personalized Plan Route
-  app.get('/api/personalized-plan', isAuthenticated, async (req, res) => {
+  app.get('/api/personalized-plan', isAuthenticated, async (req: Request, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ message: 'User not authenticated' });
@@ -586,7 +594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Detailed Nutrition Plan Route
-  app.post('/api/nutrition-plan', isAuthenticated, async (req, res) => {
+  app.post('/api/nutrition-plan', isAuthenticated, async (req: Request, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ message: 'User not authenticated' });
@@ -635,8 +643,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   // Fitness data endpoint
-  app.get('/api/fitness-data', isAuthenticated, async (req, res) => {
+  app.get('/api/fitness-data', isAuthenticated, async (req: Request, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ message: 'User not authenticated' });
@@ -649,19 +659,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(fitnessData);
     } catch (error) {
       console.error(`[GET] /api/fitness-data error { userId: ${userId} }`, error);
-      if (error instanceof Error && error.message === 'Google access token not found') {
-        return res.status(401).json({ message: 'Please connect your Google Fit account' });
+      if (error instanceof Error) {
+        if (error.message === 'Google access token not found') {
+          return res.status(401).json({ message: 'Please connect your Google Fit account' });
+        } else if (error.message.includes('404')) {
+          return res.status(400).json({ message: 'No fitness data available. Make sure you have granted all required permissions.' });
+        } else if (error.message.includes('401') || error.message.includes('403')) {
+          return res.status(401).json({ message: 'Access to fitness data denied. Please reconnect your Google Fit account.' });
+        }
       }
-      res.status(500).json({ message: 'Failed to fetch fitness data' });
+      res.status(500).json({ message: 'Failed to fetch fitness data. Please try again later.' });
     }
   });
 
   // Catch-all middleware for unmatched requests
-  app.use((req, res, next) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     console.log("[CATCH-ALL] No route matched for", req.method, req.originalUrl);
     next();
   });
 
-  const httpServer = createServer(app);
   return httpServer;
 }

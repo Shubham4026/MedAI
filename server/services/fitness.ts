@@ -19,50 +19,81 @@ export async function getFitnessData(userId: number): Promise<FitnessData> {
       throw new Error('Google access token not found');
     }
 
+    // Check if token is expired
+    if (user.googleTokenExpiry && new Date(user.googleTokenExpiry) < new Date()) {
+      if (!user.googleRefreshToken) {
+        throw new Error('Google refresh token not found');
+      }
+      // Token is expired, try to refresh it
+      try {
+        const response = await axios.post('https://oauth2.googleapis.com/token', {
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          refresh_token: user.googleRefreshToken,
+          grant_type: 'refresh_token'
+        });
+
+        const { access_token, expires_in } = response.data;
+        console.log(access_token,"Access Toekn");
+        await storage.updateUser(userId, {
+          googleAccessToken: access_token,
+          googleTokenExpiry: new Date(Date.now() + expires_in * 1000)
+        });
+
+        user.googleAccessToken = access_token;
+      } catch (error) {
+        console.error('Error refreshing Google token:', error);
+        throw new Error('Failed to refresh Google access token');
+      }
+    }
+
     const now = new Date();
     const startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Last 24 hours
 
+    const makeRequest = async (dataType: string) => {
+      try {
+        console.log(`Making fitness request for ${dataType}`, {
+          startTime: new Date(startTime).toISOString(),
+          endTime: new Date(now).toISOString(),
+        });
+
+        const response = await axios({
+          method: 'POST',
+          url: 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate',
+          headers: {
+            Authorization: `Bearer ${user.googleAccessToken}`,
+            'Content-Type': 'application/json',
+          },
+          data: {
+            aggregateBy: [{
+              dataTypeName: dataType,
+            }],
+            bucketByTime: { durationMillis: 24 * 60 * 60 * 1000 }, // 24 hours
+            startTimeMillis: startTime.getTime(),
+            endTimeMillis: now.getTime(),
+          }
+        });
+
+        console.log(`Fitness response for ${dataType}:`, response.data);
+        return response;
+      } catch (error: any) {
+        console.error(`Error fetching ${dataType}:`, {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+        throw error;
+      }
+    };
+
     // Get steps data
-    const stepsResponse = await axios.get('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
-      headers: {
-        Authorization: `Bearer ${user.googleAccessToken}`,
-      },
-      params: {
-        aggregateBy: [{
-          dataTypeName: 'com.google.step_count.delta',
-        }],
-        startTimeMillis: startTime.getTime(),
-        endTimeMillis: now.getTime(),
-      },
-    });
+    const stepsResponse = await makeRequest('com.google.step_count.delta');
 
     // Get heart rate data
-    const heartRateResponse = await axios.get('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
-      headers: {
-        Authorization: `Bearer ${user.googleAccessToken}`,
-      },
-      params: {
-        aggregateBy: [{
-          dataTypeName: 'com.google.heart_rate.bpm',
-        }],
-        startTimeMillis: startTime.getTime(),
-        endTimeMillis: now.getTime(),
-      },
-    });
+    const heartRateResponse = await makeRequest('com.google.heart_rate.bpm');
 
     // Get calories data
-    const caloriesResponse = await axios.get('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
-      headers: {
-        Authorization: `Bearer ${user.googleAccessToken}`,
-      },
-      params: {
-        aggregateBy: [{
-          dataTypeName: 'com.google.calories.expended',
-        }],
-        startTimeMillis: startTime.getTime(),
-        endTimeMillis: now.getTime(),
-      },
-    });
+    const caloriesResponse = await makeRequest('com.google.calories.expended');
 
     // Process and return the data
     const steps = stepsResponse.data.bucket[0]?.dataset[0]?.point[0]?.value[0]?.intVal || 0;

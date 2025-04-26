@@ -10,6 +10,10 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  // Google OAuth tokens
+  googleAccessToken: text("google_access_token"),
+  googleRefreshToken: text("google_refresh_token"),
+  googleTokenExpiry: timestamp("google_token_expiry"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -24,12 +28,13 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   firstName: true,
   lastName: true,
+  googleAccessToken: true,
+  googleRefreshToken: true,
+  googleTokenExpiry: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = {
-  googleAccessToken?: string;
-} & typeof users.$inferSelect;
+export type User = typeof users.$inferSelect;
 
 // Health profile for storing user health information
 // export const healthProfiles = pgTable("health_profiles", {
