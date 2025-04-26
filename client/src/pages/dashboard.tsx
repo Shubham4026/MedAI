@@ -33,6 +33,7 @@ import { AlertCircle } from "lucide-react";
 import { RefreshCw } from "lucide-react";
 import HealthMetrics from "@/components/dashboard/HealthMetrics";
 import FloatingVoiceAssistant from "@/components/voice-assistant/FloatingVoiceAssistant";
+import WhatsAppWidget from "@/components/whatsapp/WhatsAppWidget";
 
 // Define the PersonalizedHealthPlan interface locally instead of importing it
 interface PersonalizedHealthPlan {
@@ -314,8 +315,14 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Voice Assistant Floating Button */}
+      {/* Voice Assistant Floating Button - positioned to the right */}
       <FloatingVoiceAssistant position="bottom-right" />
+
+      {/* WhatsApp Bot Floating Button - positioned above the voice assistant */}
+      <WhatsAppWidget
+        position="above-assistant"
+        botUrl="https://wa.me/ais/1333266417904929?s=5"
+      />
 
       {/* Personalized Health Plan Dialog */}
       <Dialog open={isPlanDialogOpen} onOpenChange={setIsPlanDialogOpen}>
