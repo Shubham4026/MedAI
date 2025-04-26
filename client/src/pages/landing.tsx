@@ -93,8 +93,19 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="flex items-center justify-center">
-                <div className="w-[550px] h-[550px] rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
-                  Dashboard Preview
+                <div className="w-[550px] h-[550px] rounded-lg overflow-hidden shadow-xl">
+                  <img
+                    src="/assets/Medi_ai_assistant.png"
+                    alt="MediAI Health Assistant"
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      // Fallback in case the image doesn't exist
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src =
+                        "https://d2jx2rerrg6sh3.cloudfront.net/images/Article_Images/ImageForArticle_24532_17066301121638048.jpg";
+                    }}
+                  />
                 </div>
               </div>
             </div>
