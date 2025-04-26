@@ -1,9 +1,10 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
-import { Analysis, UrgencyLevel } from "@/lib/types";
+import { Analysis, UrgencyLevel, Condition } from "@/lib/types";
 import { AlertTriangle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Bolt } from "lucide-react";
+import { Link } from "wouter";
 
 interface AnalysisResponseProps {
   message: string;
@@ -28,6 +29,23 @@ const urgencyProgressWidths: Record<UrgencyLevel, string> = {
   mild: "w-1/4",
   moderate: "w-1/2",
   severe: "w-3/4"
+};
+
+const getHospitalSpecialty = (conditions: Condition[]): string => {
+  const highLikelihoodCondition = conditions.find(c => c.likelihood === "High")?.name.toLowerCase();
+  
+  if (!highLikelihoodCondition) return 'general';
+
+  if (highLikelihoodCondition.includes('child') || highLikelihoodCondition.includes('pediatric')) {
+    return 'pediatric';
+  } else if (highLikelihoodCondition.includes('heart') || highLikelihoodCondition.includes('cardiac')) {
+    return 'heart';
+  } else if (highLikelihoodCondition.includes('bone') || highLikelihoodCondition.includes('joint') || 
+             highLikelihoodCondition.includes('fracture') || highLikelihoodCondition.includes('ortho')) {
+    return 'ortho';
+  }
+
+  return 'general';
 };
 
 export function AnalysisResponse({ message, analysis, className, followUpQuestion }: AnalysisResponseProps) {
@@ -106,11 +124,13 @@ export function AnalysisResponse({ message, analysis, className, followUpQuestio
             <div className="px-4 py-3 border-t border-gray-200">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Would you like to:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <Button variant="default" className="flex items-center">
-                  <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Find nearby Hospitals
+                <Button asChild variant="default" className="flex items-center">
+                  <Link href={`/nearby-hospitals?specialty=${getHospitalSpecialty(analysis.conditions)}`}>
+                    <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Find nearby Hospitals
+                  </Link>
                 </Button>
                 <Button variant="outline" className="flex items-center bg-primary-50">
                   <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,10 +1,12 @@
 import React from "react";
 
-const specialties = ["All", "Pediatric", "Ortho", "Heart", "MD"];
+export type HospitalSpecialty = 'pediatric' | 'ortho' | 'heart' | 'general';
+
+const specialties: HospitalSpecialty[] = ['general', 'pediatric', 'ortho', 'heart'];
 
 interface FilterBarProps {
-  filters: { specialty: string };
-  onChange: (filters: { specialty: string }) => void;
+  filters: { specialty: HospitalSpecialty, radius: number };
+  onChange: (filters: Partial<{ specialty: HospitalSpecialty, radius: number }>) => void;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({ filters, onChange }) => (
@@ -16,11 +18,11 @@ const FilterBar: React.FC<FilterBarProps> = ({ filters, onChange }) => (
       <select
         id="specialty"
         value={filters.specialty}
-        onChange={e => onChange({ ...filters, specialty: e.target.value })}
+        onChange={e => onChange({ specialty: e.target.value as HospitalSpecialty })}
         className="block w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
       >
         {specialties.map(s => (
-          <option key={s} value={s}>{s}</option>
+          <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
         ))}
       </select>
     </div>

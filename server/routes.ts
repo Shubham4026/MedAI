@@ -476,7 +476,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 messageId: responseMessage.id,
                 urgencyLevel: analysis.urgency,
                 conditions: analysis.conditions, 
-                suggestions: analysis.suggestions 
+                suggestions: analysis.suggestions,
+                specialty: analysis.specialty
               });
             } catch (analysisSaveError) {
               console.error("Error saving analysis details:", analysisSaveError);

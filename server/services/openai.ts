@@ -20,6 +20,7 @@ interface SymptomAnalysisResult {
   suggestions: Array<{ text: string; isWarning: boolean; reasoning: string }>;
   message: string;
   followUpQuestion: string;
+  specialty?: "pediatric" | "heart" | "ortho" | "general";
 }
 
 /**
@@ -63,10 +64,11 @@ console.log("healthProfileContext", healthProfileContext);
     --- IMPORTANT RESPONSE FORMAT --- 
     Your response MUST be ONLY a single, valid JSON object conforming EXACTLY to the following structure. 
     DO NOT include any text, explanation, apologies, or markdown formatting before or after the JSON object. 
-    The JSON object MUST contain ONLY the following keys: "urgency", "conditions", "suggestions", "message", "followUpQuestion".
+    The JSON object MUST contain ONLY the following keys: "urgency", "conditions", "suggestions", "message", "followUpQuestion", "specialty".
     
     { 
       "urgency": "mild" | "moderate" | "severe",
+      "specialty": "pediatric" | "heart" | "ortho" | "general",
       "conditions": [{ "name": string, "likelihood": "High" | "Moderate" | "Low", "explanation": string }],
       "suggestions": [{ "text": string, "isWarning": boolean, "reasoning": string }],
       "message": string, /* A comprehensive summary message for the user, explaining the key findings and advice. Please Elaborate this to alot */
@@ -116,14 +118,19 @@ console.log("healthProfileContext", healthProfileContext);
       // Fallback response if parsing fails
       return {
         urgency: "mild",
-        conditions: [{ name: "Unable to analyze symptoms", likelihood: "Low", explanation: "An error occurred while analyzing the symptoms." }],
-        suggestions: [{
-          text: "Please consult with a healthcare provider for proper evaluation",
-          isWarning: true,
-          reasoning: "A healthcare professional can provide a more accurate diagnosis and treatment plan."
+        conditions: [{ 
+          name: "Unknown", 
+          likelihood: "Low", 
+          explanation: "Unable to determine conditions from the provided symptoms." 
         }],
-        message: "I apologize, but I encountered an issue processing the analysis. For accurate health advice, please consult with a healthcare professional.",
-        followUpQuestion: "Could you clarify your symptoms?"
+        suggestions: [{ 
+          text: "Please consult with a healthcare provider for proper evaluation", 
+          isWarning: true,
+          reasoning: "Unable to properly analyze symptoms"
+        }],
+        message: "I apologize, but I couldn't properly analyze your symptoms. For accurate health advice, please consult with a healthcare professional.",
+        followUpQuestion: "Could you provide more specific details about your symptoms?",
+        specialty: "general" // Adding the required specialty field with a default value
       };
     }
   } catch (error) {
@@ -134,7 +141,8 @@ console.log("healthProfileContext", healthProfileContext);
         conditions: [], // Default empty array
         suggestions: [], // Default empty array
         message: `Sorry, I encountered an error trying to analyze the symptoms: ${error instanceof Error ? error.message : String(error)}. Please try again or consult a healthcare professional directly.`, // Put error in message
-        followUpQuestion: "Could you please try describing your symptoms again?" // Default value
+        followUpQuestion: "Could you please try describing your symptoms again?", // Default value
+        specialty: 'general'
       };
   }
 }
