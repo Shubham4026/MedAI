@@ -24,6 +24,7 @@ import { HeartPulse } from "lucide-react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { Route as WouterRoute, Redirect } from "wouter";
 import { RedirectProvider, useRedirect } from "@/contexts/redirect-context";
+import { WelcomePopup } from "@/components/welcome/WelcomePopup";
 
 interface ProtectedRouteProps {
   component: React.ComponentType<any>;
@@ -94,7 +95,9 @@ function AppContent() {
     document.title = "MediAI - AI-Powered Health Assistant";
   }, []);
 
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
     // Simulate minimal delay for loader (can be removed or adjusted)
     const timeout = setTimeout(() => setLoading(false), 400);
@@ -127,6 +130,7 @@ function AppContent() {
     <>
       <Router />
       <Toaster />
+      {user && <WelcomePopup />}
     </>
   );
 }
