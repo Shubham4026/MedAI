@@ -62,12 +62,7 @@ const Header = () => {
                 <Siren className="h-6 w-6" />
                 <span className="hidden sm:inline">Emergency</span>
               </Button>
-              <Button asChild variant="ghost" className="flex items-center space-x-2" title="Health Metrics">
-                <Link href="/health-metrics">
-                  <TrendingUp className="h-6 w-6 text-gray-600" />
-                  <span className="hidden sm:inline">Health Metrics</span>
-                </Link>
-              </Button>
+
             </div>
 
             {/* Notifications */}

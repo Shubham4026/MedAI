@@ -3,11 +3,62 @@ import { createServer, type Server } from "http";
 import passport from "passport";
 import { storage } from "./storage";
 // Import from the direct OpenAI service
-import { analyzeSymptoms } from "./services/openai";
+import { analyzeSymptoms, generatePersonalizedPlan, generateDetailedNutritionPlan } from "./services/openai";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { setupAuth } from "./auth";
 import { fetchHospitalsFromGoogle } from "./services/googleHospitals";
 import { fetchPlaceDetails } from "./services/googleHospitals";
+import { Router } from 'express';
+import { User, HealthProfile, Conversation, Message, PersonalizedHealthPlan, DetailedNutritionPlan } from '../shared/schema';
+import { getFitnessData } from './services/fitness'; // Use Message, remove SymptomAnalysis
+import { z } from 'zod';
+
+// Helper function (reuse or adapt from previous logic)
+function formatProfileForContext(profile: HealthProfile | null): string {
+    if (!profile) return '';
+
+    const profileSummaryLines: string[] = [];
+    const skipKeys = ['id', 'userId', 'lastUpdated', 'createdAt', 'updatedAt']; // Keys to skip
+
+    for (const key in profile) {
+        if (skipKeys.includes(key)) continue;
+
+        const value = profile[key as keyof HealthProfile];
+
+        if (value === null || value === undefined || (Array.isArray(value) && value.length === 0) || value === '') {
+            continue; // Skip empty/null fields
+        }
+
+        let formattedValue = String(value);
+        // Simple camelCase to Title Case conversion
+        const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+
+        if (Array.isArray(value)) {
+            formattedValue = value.join(', ');
+        } else if (typeof value === 'object' && value !== null && Object.keys(value).length > 0) {
+           // Basic object formatting - might need refinement based on actual object structures
+           try {
+             // Attempt to stringify common nested objects like lifestyleHabits, recentLabResults
+             const simpleString = Object.entries(value).map(([k, v]) => `${k}: ${v}`).join(', ');
+             // Limit length to avoid excessive context
+             formattedValue = simpleString.length > 150 ? JSON.stringify(value) : `{ ${simpleString} }`;
+           } catch {
+             formattedValue = JSON.stringify(value); // Fallback
+           }
+        }
+        // Add units
+        else if (key === 'height' && typeof value === 'number') formattedValue = `${value} cm`;
+        else if (key === 'weight' && typeof value === 'number') formattedValue = `${value} kg`;
+        else if (key === 'waterIntakeLiters' && typeof value === 'number') formattedValue = `${value} L`;
+        else if (key === 'bmi' && typeof value === 'number') formattedValue = `${value.toFixed(2)}`; // Format BMI
+
+        profileSummaryLines.push(`${formattedKey}: ${formattedValue}`);
+    }
+
+    // Return empty string if no details found, otherwise format the summary
+    return profileSummaryLines.length > 0 ? `User Health Profile:
+${profileSummaryLines.join('\n')}` : '';
+}
 
 // Middleware to check if the user is authenticated
 function isAuthenticated(req: Request, res: Response, next: NextFunction) {
@@ -19,6 +70,8 @@ function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   return res.status(401).json({ message: "Authentication required" });
 }
 
+// Create a new router
+const router = Router();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   console.log("[ROUTES] registerRoutes called");
@@ -478,6 +531,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(analyses);
     } catch (error: any) {
       res.status(500).json({ message: `Server error: ${error?.message || "Unknown error"}` });
+    }
+  });
+
+  // Personalized Plan Route
+  app.get('/api/personalized-plan', isAuthenticated, async (req, res) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    try {
+      console.log(`[GET] /api/personalized-plan called { userId: ${userId} }`);
+      // Use the storage instance to get the profile
+      const profile = await storage.getHealthProfile(userId);
+
+      if (!profile) {
+        return res.status(404).json({ message: 'Health profile not found. Please create one first.' });
+      }
+
+      // Format profile context using the helper function
+      const healthProfileContext = formatProfileForContext(profile);
+
+      // Check if profile exists but yielded no context (all empty fields)
+      if (!healthProfileContext) {
+         console.warn(`[GET] /api/personalized-plan - Profile found but no data for context { userId: ${userId} }`);
+         return res.status(400).json({ message: 'Health profile exists but contains no actionable data to generate a plan.' });
+      }
+
+      // Generate the plan using the new service function
+      const plan: PersonalizedHealthPlan = await generatePersonalizedPlan(healthProfileContext);
+
+      console.log(`[GET] /api/personalized-plan success { userId: ${userId} }`);
+      res.json(plan);
+
+    } catch (error) {
+      console.error(`[GET] /api/personalized-plan error { userId: ${userId} }`, error);
+      // Improved error handling to give more specific feedback
+      if (error instanceof Error) {
+         if (error.message.includes('OpenAI') || error.message.includes('generate personalized plan')) {
+           // Check if it's a parsing error specifically
+           if (error.message.includes('parse valid JSON')) {
+              console.error("Invalid JSON structure received from OpenAI for plan.");
+              return res.status(502).json({ message: 'AI service returned an invalid plan format. Please try again later.' });
+           } else {
+             return res.status(502).json({ message: 'Failed to generate plan due to an AI service error. Please try again later.' });
+           }
+         }
+      }
+      // Generic internal error
+      res.status(500).json({ message: 'An internal error occurred while generating the health plan.' });
+    }
+  });
+
+  // Detailed Nutrition Plan Route
+  app.post('/api/nutrition-plan', isAuthenticated, async (req, res) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    try {
+      console.log(`[POST] /api/nutrition-plan called { userId: ${userId} }`);
+      // Use the storage instance to get the profile
+      const profile = await storage.getHealthProfile(userId);
+
+      if (!profile) {
+        return res.status(404).json({ message: 'Health profile not found. Please create one first.' });
+      }
+
+      // Format profile context using the helper function
+      const healthProfileContext = formatProfileForContext(profile);
+
+      // Check if profile exists but yielded no context (all empty fields)
+      if (!healthProfileContext) {
+         console.warn(`[POST] /api/nutrition-plan - Profile found but no data for context { userId: ${userId} }`);
+         return res.status(400).json({ message: 'Health profile exists but contains no actionable data to generate a plan.' });
+      }
+
+      // Generate the plan using the new service function
+      const plan: DetailedNutritionPlan = await generateDetailedNutritionPlan(healthProfileContext);
+
+      console.log(`[POST] /api/nutrition-plan success { userId: ${userId} }`);
+      res.json(plan);
+
+    } catch (error) {
+      console.error(`[POST] /api/nutrition-plan error { userId: ${userId} }`, error);
+      // Improved error handling to give more specific feedback
+      if (error instanceof Error) {
+         if (error.message.includes('OpenAI') || error.message.includes('generate detailed nutrition plan')) {
+           // Check if it's a parsing error specifically
+           if (error.message.includes('parse valid JSON')) {
+              console.error("Invalid JSON structure received from OpenAI for plan.");
+              return res.status(502).json({ message: 'AI service returned an invalid plan format. Please try again later.' });
+           } else {
+             return res.status(502).json({ message: 'Failed to generate plan due to an AI service error. Please try again later.' });
+           }
+         }
+      }
+      // Generic internal error
+      res.status(500).json({ message: 'An internal error occurred while generating the nutrition plan.' });
+    }
+  });
+
+  // Fitness data endpoint
+  app.get('/api/fitness-data', isAuthenticated, async (req, res) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    try {
+      console.log(`[GET] /api/fitness-data called { userId: ${userId} }`);
+      const fitnessData = await getFitnessData(Number(userId));
+      console.log(`[GET] /api/fitness-data success { userId: ${userId} }`);
+      res.json(fitnessData);
+    } catch (error) {
+      console.error(`[GET] /api/fitness-data error { userId: ${userId} }`, error);
+      if (error instanceof Error && error.message === 'Google access token not found') {
+        return res.status(401).json({ message: 'Please connect your Google Fit account' });
+      }
+      res.status(500).json({ message: 'Failed to fetch fitness data' });
     }
   });
 
