@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Header } from '@/components/layout/header';
-import { Sidebar } from '@/components/layout/sidebar';
-import { MobileMenu } from '@/components/layout/mobile-menu';
-import { ChatContainer } from '@/components/chat/chat-container';
-import { useConversations } from '@/lib/hooks';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState, useEffect } from "react";
+import { Sidebar } from "@/components/layout/sidebar";
+import { MobileMenu } from "@/components/layout/mobile-menu";
+import { ChatContainer } from "@/components/chat/chat-container";
+import { useConversations } from "@/lib/hooks";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation, Link } from "wouter";
-import { Activity, ArrowLeft, Brain } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Activity, ArrowLeft, Brain } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { saveLastSymptomCheck } from "@/lib/lastSymptomCheck";
 
 export default function Home() {
   const { user } = useAuth();
@@ -21,7 +21,16 @@ export default function Home() {
     }
   }, [user, setLocation]);
 
-  const [activeConversationId, setActiveConversationId] = useState<number | undefined>(undefined);
+  // Save the current time as the last symptom check when page loads
+  useEffect(() => {
+    if (user) {
+      saveLastSymptomCheck();
+    }
+  }, [user]);
+
+  const [activeConversationId, setActiveConversationId] = useState<
+    number | undefined
+  >(undefined);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { conversations, isLoading, createConversation } = useConversations();
   const { toast } = useToast();
@@ -38,18 +47,31 @@ export default function Home() {
 
   // Select the first conversation by default when loaded
   useEffect(() => {
-    if (!activeConversationId && sortedConversations && sortedConversations.length > 0) {
+    if (
+      !activeConversationId &&
+      sortedConversations &&
+      sortedConversations.length > 0
+    ) {
       setActiveConversationId(sortedConversations[0].id);
     }
     // If there are no conversations and not loading, create a new one automatically
     if (!isLoading && sortedConversations.length === 0 && user?.id) {
-      createConversation({ title: 'New Symptom Assessment', userId: user.id }, {
-        onSuccess: (data) => {
-          setActiveConversationId(data.id);
+      createConversation(
+        { title: "New Symptom Assessment", userId: user.id },
+        {
+          onSuccess: (data) => {
+            setActiveConversationId(data.id);
+          },
         }
-      });
+      );
     }
-  }, [sortedConversations, activeConversationId, isLoading, user, createConversation]);
+  }, [
+    sortedConversations,
+    activeConversationId,
+    isLoading,
+    user,
+    createConversation,
+  ]);
 
   const handleNewChat = () => {
     if (!user?.id) {
@@ -60,14 +82,16 @@ export default function Home() {
       });
       return;
     }
-    createConversation({ title: 'New Symptom Assessment', userId: user.id }, {
-      onSuccess: (data) => {
-        setActiveConversationId(data.id);
-        setIsMobileMenuOpen(false);
+    createConversation(
+      { title: "New Symptom Assessment", userId: user.id },
+      {
+        onSuccess: (data) => {
+          setActiveConversationId(data.id);
+          setIsMobileMenuOpen(false);
+        },
       }
-    });
+    );
   };
-
 
   const handleSelectConversation = (id: number) => {
     setActiveConversationId(id);
@@ -86,7 +110,8 @@ export default function Home() {
     // In a real app, this would generate and download a report
     toast({
       title: "Export Report",
-      description: "This feature would generate a PDF report of the current conversation.",
+      description:
+        "This feature would generate a PDF report of the current conversation.",
     });
   };
 
@@ -97,29 +122,31 @@ export default function Home() {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="hover:bg-gray-100"
-                onClick={() => setLocation('/dashboard')}
+                onClick={() => setLocation("/dashboard")}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="flex items-center space-x-2">
                 <Brain className="h-7 w-7 text-teal-600" />
-                <span className="text-xl font-bold text-teal-600">Symptom Checker</span>
+                <span className="text-xl font-bold text-teal-600">
+                  Symptom Checker
+                </span>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button 
+              <Button
                 onClick={handleNewChat}
-                variant="default" 
+                variant="default"
                 className="bg-teal-600 hover:bg-teal-700"
               >
                 New Assessment
               </Button>
               <Link href="/voice-assistant">
-                <Button 
+                <Button
                   variant="outline"
                   className="border-teal-600 text-teal-600 hover:bg-teal-50"
                 >
@@ -127,7 +154,7 @@ export default function Home() {
                 </Button>
               </Link>
               <Link href="/scan-report">
-                <Button 
+                <Button
                   variant="ghost"
                   className="border-teal-600 text-teal-600 hover:bg-teal-50"
                 >
@@ -142,7 +169,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="flex-grow flex">
         {/* Sidebar (desktop) */}
-        <Sidebar 
+        <Sidebar
           conversations={sortedConversations as any}
           isLoading={isLoading}
           activeConversationId={activeConversationId}
@@ -154,7 +181,7 @@ export default function Home() {
         <ChatContainer conversationId={activeConversationId} />
 
         {/* Mobile Menu */}
-        <MobileMenu 
+        <MobileMenu
           isOpen={isMobileMenuOpen}
           onClose={() => setIsMobileMenuOpen(false)}
           conversations={sortedConversations as any}

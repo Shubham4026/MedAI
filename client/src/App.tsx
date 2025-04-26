@@ -31,10 +31,13 @@ interface ProtectedRouteProps {
   path: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component, path }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  component: Component,
+  path,
+}) => {
   const { user } = useAuth();
   const { setRedirectPath } = useRedirect();
-  
+
   if (!user) {
     setRedirectPath(path);
     return <Redirect to="/auth?mode=login" />;
@@ -49,7 +52,9 @@ function Router() {
       fallback={
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
           <HeartPulse className="h-16 w-16 text-red-500 animate-heartbeat" />
-          <span className="mt-4 text-red-500 font-semibold text-lg">Loading...</span>
+          <span className="mt-4 text-red-500 font-semibold text-lg">
+            Loading...
+          </span>
           <style>{`
             @keyframes heartbeat {
               0%, 100% { transform: scale(1); filter: brightness(1); }
@@ -97,7 +102,7 @@ function AppContent() {
 
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     // Simulate minimal delay for loader (can be removed or adjusted)
     const timeout = setTimeout(() => setLoading(false), 400);
@@ -108,7 +113,9 @@ function AppContent() {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
         <HeartPulse className="h-16 w-16 text-red-500 animate-heartbeat" />
-        <span className="mt-4 text-red-500 font-semibold text-lg">Loading...</span>
+        <span className="mt-4 text-red-500 font-semibold text-lg">
+          Loading...
+        </span>
         <style>{`
           @keyframes heartbeat {
             0%, 100% { transform: scale(1); filter: brightness(1); }
@@ -139,13 +146,14 @@ function App() {
   // Add metadata to the document head
   useEffect(() => {
     document.title = "MediAI - AI-Powered Health Assistant";
-    
+
     // Add favicon
-    const link = document.createElement('link');
-    link.rel = 'icon';
-    link.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233B82F6"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>';
+    const link = document.createElement("link");
+    link.rel = "icon";
+    link.href =
+      'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233B82F6"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>';
     document.head.appendChild(link);
-    
+
     return () => {
       document.head.removeChild(link);
     };

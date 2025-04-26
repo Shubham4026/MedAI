@@ -27,12 +27,32 @@ import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useProfileCompletion } from "@/hooks/use-profile-completion";
 import Header from "@/components/common/Header";
-import { PersonalizedHealthPlan } from "../../../../shared/schema";
 import PersonalizedHealthPlanDisplay from "@/components/dashboard/PersonalizedHealthPlanDisplay";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { RefreshCw } from "lucide-react";
 import HealthMetrics from "@/components/dashboard/HealthMetrics";
+import FloatingVoiceAssistant from "@/components/voice-assistant/FloatingVoiceAssistant";
+
+// Define the PersonalizedHealthPlan interface locally instead of importing it
+interface PersonalizedHealthPlan {
+  overallSummary: string;
+  keyMetricsFocus: string[];
+  riskHighlights: Array<{
+    risk: string;
+    explanation: string;
+    severity: "Low" | "Moderate" | "High";
+  }>;
+  dietRecommendations: Array<{ recommendation: string; reasoning: string }>;
+  exerciseRecommendations: Array<{ recommendation: string; reasoning: string }>;
+  preventiveCare: Array<{
+    suggestion: string;
+    frequency?: string;
+    reasoning: string;
+  }>;
+  mentalWellness: Array<{ suggestion: string; reasoning: string }>;
+  disclaimer: string;
+}
 
 function ProfileCompletionBanner() {
   const { completion, loading } = useProfileCompletion();
@@ -89,7 +109,40 @@ export default function Dashboard() {
   );
   const [planError, setPlanError] = useState<string | null>(null);
   const [isPlanDialogOpen, setIsPlanDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'health-metrics'>('overview');
+  const [activeTab, setActiveTab] = useState<"overview" | "health-metrics">(
+    "overview"
+  );
+  // State to track last symptom check
+  const [lastSymptomCheck, setLastSymptomCheck] =
+    useState<string>("Not yet checked");
+  // State for health score
+  const [healthScore, setHealthScore] = useState<number | null>(null);
+
+  // Function to format the last symptom check time
+  const formatLastSymptomCheck = () => {
+    const lastCheck = localStorage.getItem("lastSymptomCheck");
+    if (!lastCheck) return "Not yet checked";
+
+    const lastCheckDate = new Date(lastCheck);
+    const now = new Date();
+    const diffMs = now.getTime() - lastCheckDate.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHrs === 0) {
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        return diffMins <= 1 ? "Just now" : `${diffMins} minutes ago`;
+      }
+      return diffHrs === 1 ? "1 hour ago" : `${diffHrs} hours ago`;
+    } else if (diffDays === 1) {
+      return "Yesterday";
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return lastCheckDate.toLocaleDateString();
+    }
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -120,6 +173,51 @@ export default function Dashboard() {
       }
     }
   }, [healthPlan]);
+
+  // Effect to update the last symptom check display
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Update the last symptom check value
+      setLastSymptomCheck(formatLastSymptomCheck());
+
+      // Set up an interval to refresh the relative time display
+      const intervalId = setInterval(() => {
+        setLastSymptomCheck(formatLastSymptomCheck());
+      }, 60000); // Update every minute
+
+      return () => clearInterval(intervalId);
+    }
+  }, []);
+
+  // Effect to fetch the health profile and get the health score
+  useEffect(() => {
+    if (user) {
+      const fetchHealthProfile = async () => {
+        try {
+          const response = await fetch("/api/health-profile", {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.healthScore) {
+              setHealthScore(data.healthScore);
+            } else {
+              // If no health score, set a default
+              setHealthScore(70);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching health profile:", error);
+        }
+      };
+
+      fetchHealthProfile();
+    }
+  }, [user]);
 
   function handlePlanButtonClick() {
     if (healthPlan) {
@@ -176,7 +274,7 @@ export default function Dashboard() {
       <Dialog>
         <DialogTrigger asChild>
           <Button
-            className="fixed bottom-6 right-6 rounded-full bg-red-600 hover:bg-red-700 shadow-lg p-6 group"
+            className="fixed bottom-6 left-6 rounded-full bg-red-600 hover:bg-red-700 shadow-lg p-6 group"
             size="icon"
           >
             <div className="relative">
@@ -215,6 +313,9 @@ export default function Dashboard() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+
+      {/* Voice Assistant Floating Button */}
+      <FloatingVoiceAssistant position="bottom-right" />
 
       {/* Personalized Health Plan Dialog */}
       <Dialog open={isPlanDialogOpen} onOpenChange={setIsPlanDialogOpen}>
@@ -431,11 +532,14 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <Activity className="h-5 w-5 text-gray-400" />
-                  <div>
+                  <div
+                    className="flex-grow cursor-pointer hover:bg-gray-50 p-2 rounded-md"
+                    onClick={() => setLocation("/symptom-checker")}
+                  >
                     <p className="text-sm font-medium text-gray-900">
                       Last symptom check
                     </p>
-                    <p className="text-sm text-gray-500">2 days ago</p>
+                    <p className="text-sm text-gray-500">{lastSymptomCheck}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
