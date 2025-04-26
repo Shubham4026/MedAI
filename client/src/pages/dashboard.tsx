@@ -21,18 +21,18 @@ import {
   Phone,
   Siren,
   TrendingUp,
-  AlertCircle,
-  RefreshCw,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useProfileCompletion } from "@/hooks/use-profile-completion";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { formatLastSymptomCheck } from "@/lib/lastSymptomCheck";
-import HealthMetrics from "@/components/dashboard/HealthMetrics";
 import Header from "@/components/common/Header";
 import PersonalizedHealthPlanDisplay from "@/components/dashboard/PersonalizedHealthPlanDisplay";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+import HealthMetrics from "@/components/dashboard/HealthMetrics";
+import FloatingVoiceAssistant from "@/components/voice-assistant/FloatingVoiceAssistant";
 
 // Define the PersonalizedHealthPlan interface locally instead of importing it
 interface PersonalizedHealthPlan {
@@ -117,6 +117,32 @@ export default function Dashboard() {
     useState<string>("Not yet checked");
   // State for health score
   const [healthScore, setHealthScore] = useState<number | null>(null);
+
+  // Function to format the last symptom check time
+  const formatLastSymptomCheck = () => {
+    const lastCheck = localStorage.getItem("lastSymptomCheck");
+    if (!lastCheck) return "Not yet checked";
+
+    const lastCheckDate = new Date(lastCheck);
+    const now = new Date();
+    const diffMs = now.getTime() - lastCheckDate.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHrs === 0) {
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        return diffMins <= 1 ? "Just now" : `${diffMins} minutes ago`;
+      }
+      return diffHrs === 1 ? "1 hour ago" : `${diffHrs} hours ago`;
+    } else if (diffDays === 1) {
+      return "Yesterday";
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return lastCheckDate.toLocaleDateString();
+    }
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -248,7 +274,7 @@ export default function Dashboard() {
       <Dialog>
         <DialogTrigger asChild>
           <Button
-            className="fixed bottom-6 right-6 rounded-full bg-red-600 hover:bg-red-700 shadow-lg p-6 group"
+            className="fixed bottom-6 left-6 rounded-full bg-red-600 hover:bg-red-700 shadow-lg p-6 group"
             size="icon"
           >
             <div className="relative">
@@ -287,6 +313,9 @@ export default function Dashboard() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+
+      {/* Voice Assistant Floating Button */}
+      <FloatingVoiceAssistant position="bottom-right" />
 
       {/* Personalized Health Plan Dialog */}
       <Dialog open={isPlanDialogOpen} onOpenChange={setIsPlanDialogOpen}>
@@ -519,9 +548,7 @@ export default function Dashboard() {
                     <p className="text-sm font-medium text-gray-900">
                       Health score
                     </p>
-                    <p className="text-sm text-gray-500">
-                      {healthScore ? `${healthScore}/100` : "Loading..."}
-                    </p>
+                    <p className="text-sm text-gray-500">85/100</p>
                   </div>
                 </div>
               </div>
