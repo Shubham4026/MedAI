@@ -235,6 +235,7 @@ export const analyses = pgTable("analyses", {
   urgencyLevel: text("urgency_level").notNull(), // 'mild', 'moderate', 'severe'
   conditions: json("conditions").notNull(),
   suggestions: json("suggestions").notNull(),
+  specialty: text("specialty"), // 'pediatric', 'heart', 'ortho', 'general'
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -255,6 +256,7 @@ export const insertAnalysisSchema = createInsertSchema(analyses).pick({
   urgencyLevel: true,
   conditions: true,
   suggestions: true,
+  specialty: true,
 });
 
 export type InsertAnalysis = z.infer<typeof insertAnalysisSchema>;

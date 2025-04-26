@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import HospitalCard from "./HospitalCard";
 import FilterBar from "./FilterBar";
 import { fetchHospitals, fetchHospitalsFromGoogle } from "@/services/hospitalService";
+import { HospitalSpecialty } from "./FilterBar";
 
 interface Hospital {
   id: string; // Now represents Google Place ID
@@ -13,21 +14,27 @@ interface Hospital {
 
 interface NearbyHospitalsListProps {
   userLocation: { lat: number; lng: number } | null;
+  specialty: 'pediatric' | 'ortho' | 'heart' | 'general';
 }
 
 const DEFAULT_RADIUS = 10; // km
 
-const NearbyHospitalsList: React.FC<NearbyHospitalsListProps> = ({ userLocation }) => {
-  const [filters, setFilters] = useState({ specialty: "All", radius: DEFAULT_RADIUS });
+const NearbyHospitalsList: React.FC<NearbyHospitalsListProps> = ({ userLocation, specialty }) => {
+  const [filters, setFilters] = useState({ specialty: specialty, radius: DEFAULT_RADIUS });
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fallback, setFallback] = useState(false);
 
   // Handler to merge filter updates from FilterBar
-  const handleFilterChange = (newFilters: Partial<{ specialty: string; radius: number }>) => {
+  const handleFilterChange = (newFilters: Partial<{ specialty: HospitalSpecialty; radius: number }>) => {
     setFilters(prevFilters => ({ ...prevFilters, ...newFilters }));
   };
+
+  // Update filters when specialty prop changes
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, specialty }));
+  }, [specialty]);
 
   useEffect(() => {
     if (!userLocation) return;
