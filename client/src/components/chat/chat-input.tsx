@@ -56,50 +56,61 @@ export function ChatInput({ onSend, isDisabled = false }: ChatInputProps) {
           setListening={setListening}
         />
       )}
-      <div className="border-t border-gray-200 px-4 py-4 sm:px-6">
-        <form onSubmit={handleSend} className="flex space-x-3">
-          <div className="min-w-0 flex-1">
-            <div className="relative rounded-md shadow-sm">
-              <textarea
-                ref={textareaRef}
-                rows={1}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault(); // Prevents adding a new line
-                    handleSend(e as unknown as React.FormEvent);
-                  }
-                }}
-                className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 pl-3 pr-10 text-sm resize-none overflow-hidden"
-                placeholder="Describe your symptoms..."
-                disabled={isDisabled}
-              />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                <button
-                  type="button"
-                  className="p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  onClick={handleVoice}
+      <div
+        className="sticky bottom-0 z-10 border-t border-gray-200 bg-white px-4 py-4 sm:px-6"
+        style={{ marginTop: 2 }}
+      >
+        <div>
+          <form onSubmit={handleSend} className="flex items-center space-x-3">
+            <div className="min-w-0 flex-1">
+              <div className="relative rounded-md shadow-sm">
+                <textarea
+                  ref={textareaRef}
+                  rows={1}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend(e as unknown as React.FormEvent);
+                    }
+                  }}
+                  className="w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 focus:outline-none pl-3 pr-10 text-sm resize-none overflow-hidden"
+                  placeholder="Describe your symptoms..."
                   disabled={isDisabled}
-                  aria-label="Start voice input"
-                >
-                  <Mic
-                    className={`w-5 h-5 ${
-                      listening ? "text-red-500 animate-pulse" : "text-gray-400"
-                    }`}
-                  />
-                </button>
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <button
+                    type="button"
+                    className="p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    onClick={handleVoice}
+                    disabled={isDisabled}
+                    aria-label="Start voice input"
+                  >
+                    <Mic
+                      className={`w-5 h-5 ${
+                        listening
+                          ? "text-red-500 animate-pulse"
+                          : "text-gray-400"
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          <Button type="submit" disabled={!message.trim() || isDisabled}>
-            <Send className="h-5 w-5" />
-          </Button>
-        </form>
-        <p className="mt-2 text-xs text-gray-500">
-          For emergencies, please call your local emergency number (e.g., 911 in
-          the US) immediately.
-        </p>
+            <Button
+              type="submit"
+              disabled={!message.trim() || isDisabled}
+              className="focus:outline-none"
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </form>
+          <p className="mt-2 text-xs text-gray-500">
+            For emergencies, please call your local emergency number (e.g., 911
+            in the US) immediately.
+          </p>
+        </div>
       </div>
     </>
   );
