@@ -21,18 +21,38 @@ import {
   Phone,
   Siren,
   TrendingUp,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useProfileCompletion } from "@/hooks/use-profile-completion";
-import Header from "@/components/common/Header";
-import { PersonalizedHealthPlan } from "../../../../shared/schema";
-import PersonalizedHealthPlanDisplay from "@/components/dashboard/PersonalizedHealthPlanDisplay";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { RefreshCw } from "lucide-react";
+import { formatLastSymptomCheck } from "@/lib/lastSymptomCheck";
 import HealthMetrics from "@/components/dashboard/HealthMetrics";
+import Header from "@/components/common/Header";
+import PersonalizedHealthPlanDisplay from "@/components/dashboard/PersonalizedHealthPlanDisplay";
+
+// Define the PersonalizedHealthPlan interface locally instead of importing it
+interface PersonalizedHealthPlan {
+  overallSummary: string;
+  keyMetricsFocus: string[];
+  riskHighlights: Array<{
+    risk: string;
+    explanation: string;
+    severity: "Low" | "Moderate" | "High";
+  }>;
+  dietRecommendations: Array<{ recommendation: string; reasoning: string }>;
+  exerciseRecommendations: Array<{ recommendation: string; reasoning: string }>;
+  preventiveCare: Array<{
+    suggestion: string;
+    frequency?: string;
+    reasoning: string;
+  }>;
+  mentalWellness: Array<{ suggestion: string; reasoning: string }>;
+  disclaimer: string;
+}
 
 function ProfileCompletionBanner() {
   const { completion, loading } = useProfileCompletion();
@@ -89,7 +109,14 @@ export default function Dashboard() {
   );
   const [planError, setPlanError] = useState<string | null>(null);
   const [isPlanDialogOpen, setIsPlanDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'health-metrics'>('overview');
+  const [activeTab, setActiveTab] = useState<"overview" | "health-metrics">(
+    "overview"
+  );
+  // State to track last symptom check
+  const [lastSymptomCheck, setLastSymptomCheck] =
+    useState<string>("Not yet checked");
+  // State for health score
+  const [healthScore, setHealthScore] = useState<number | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -120,6 +147,51 @@ export default function Dashboard() {
       }
     }
   }, [healthPlan]);
+
+  // Effect to update the last symptom check display
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Update the last symptom check value
+      setLastSymptomCheck(formatLastSymptomCheck());
+
+      // Set up an interval to refresh the relative time display
+      const intervalId = setInterval(() => {
+        setLastSymptomCheck(formatLastSymptomCheck());
+      }, 60000); // Update every minute
+
+      return () => clearInterval(intervalId);
+    }
+  }, []);
+
+  // Effect to fetch the health profile and get the health score
+  useEffect(() => {
+    if (user) {
+      const fetchHealthProfile = async () => {
+        try {
+          const response = await fetch("/api/health-profile", {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.healthScore) {
+              setHealthScore(data.healthScore);
+            } else {
+              // If no health score, set a default
+              setHealthScore(70);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching health profile:", error);
+        }
+      };
+
+      fetchHealthProfile();
+    }
+  }, [user]);
 
   function handlePlanButtonClick() {
     if (healthPlan) {
@@ -431,11 +503,14 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <Activity className="h-5 w-5 text-gray-400" />
-                  <div>
+                  <div
+                    className="flex-grow cursor-pointer hover:bg-gray-50 p-2 rounded-md"
+                    onClick={() => setLocation("/symptom-checker")}
+                  >
                     <p className="text-sm font-medium text-gray-900">
                       Last symptom check
                     </p>
-                    <p className="text-sm text-gray-500">2 days ago</p>
+                    <p className="text-sm text-gray-500">{lastSymptomCheck}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -444,7 +519,9 @@ export default function Dashboard() {
                     <p className="text-sm font-medium text-gray-900">
                       Health score
                     </p>
-                    <p className="text-sm text-gray-500">85/100</p>
+                    <p className="text-sm text-gray-500">
+                      {healthScore ? `${healthScore}/100` : "Loading..."}
+                    </p>
                   </div>
                 </div>
               </div>
