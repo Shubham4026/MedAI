@@ -27,7 +27,9 @@ export const insertUserSchema = createInsertSchema(users).pick({
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type User = {
+  googleAccessToken?: string;
+} & typeof users.$inferSelect;
 
 // Health profile for storing user health information
 // export const healthProfiles = pgTable("health_profiles", {
@@ -157,6 +159,23 @@ export const insertHealthProfileSchema = createInsertSchema(healthProfiles).pick
 export type InsertHealthProfile = z.infer<typeof insertHealthProfileSchema>;
 export type HealthProfile = typeof healthProfiles.$inferSelect;
 
+// Define the structure for the personalized health plan
+export interface PersonalizedHealthPlan {
+  overallSummary: string; // Brief overview and goals
+  keyMetricsFocus: string[]; // e.g., ["BMI", "Blood Pressure", "Cholesterol"]
+  riskHighlights: Array<{ risk: string; explanation: string; severity: 'Low' | 'Moderate' | 'High' }>; // Identified risks from profile
+  dietRecommendations: Array<{ recommendation: string; reasoning: string }>;
+  exerciseRecommendations: Array<{ recommendation: string; reasoning: string }>;
+  preventiveCare: Array<{ suggestion: string; frequency?: string; reasoning: string }>; // e.g., Screenings, check-ups
+  mentalWellness: Array<{ suggestion: string; reasoning: string }>;
+  disclaimer: string; // Standard medical disclaimer
+}
+
+/**
+ * Represents the complete health profile stored in the database.
+ *
+ */
+
 // Conversations table
 export const conversations = pgTable("conversations", {
   id: serial("id").primaryKey(),
@@ -281,3 +300,23 @@ export const insertHealthMetricSchema = createInsertSchema(healthMetrics).pick({
 
 export type InsertHealthMetric = z.infer<typeof insertHealthMetricSchema>;
 export type HealthMetric = typeof healthMetrics.$inferSelect;
+
+export interface DetailedNutritionPlan {
+  overallGoal: string; // e.g., Weight loss, muscle gain, general health
+  calorieTarget: number; // Estimated daily calorie goal
+  macronutrientTargets: {
+    proteinGrams: number;
+    carbohydrateGrams: number;
+    fatGrams: number;
+  };
+  mealPlan: {
+    breakfast: { suggestions: string[]; notes?: string };
+    lunch: { suggestions: string[]; notes?: string };
+    dinner: { suggestions: string[]; notes?: string };
+    snacks: { suggestions: string[]; notes?: string };
+  };
+  hydrationGoalLiters: number;
+  keyMicronutrientsFocus: string[]; // e.g., Iron, Vitamin D, Calcium
+  generalAdvice: string[]; // Other tips like meal timing, supplements etc.
+  disclaimer: string;
+}
