@@ -48,6 +48,7 @@
     "@types/bcrypt": "^5.0.2",
     "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
+    "chart.js": "^4.4.9",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -68,6 +69,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.0",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.1",
@@ -92,6 +94,7 @@
     "@types/express-session": "^1.18.1",
     "@types/node": "20.16.11",
     "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.16",
     "@types/passport-local": "^1.0.38",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
@@ -104,7 +107,8 @@
     "tailwindcss": "^3.4.14",
     "tsx": "^4.19.1",
     "typescript": "5.6.3",
-    "vite": "^5.4.14"
+    "vite": "^5.4.14",
+    "vite-plugin-pwa": "^1.0.0"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"

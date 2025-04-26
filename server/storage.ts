@@ -19,6 +19,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<Omit<InsertUser, 'id'>>): Promise<User>;
   
   // Health profile methods
   getHealthProfile(userId: number): Promise<HealthProfile | undefined>;
@@ -78,6 +79,15 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+
+  async updateUser(id: number, userUpdate: Partial<Omit<InsertUser, 'id'>>): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(userUpdate)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
   }
   
   // Health profile methods
