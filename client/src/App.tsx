@@ -25,6 +25,7 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { Route as WouterRoute, Redirect } from "wouter";
 import { RedirectProvider, useRedirect } from "@/contexts/redirect-context";
 import { WelcomePopup } from "@/components/welcome/WelcomePopup";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
 interface ProtectedRouteProps {
   component: React.ComponentType<any>;
@@ -138,6 +139,7 @@ function AppContent() {
       <Router />
       <Toaster />
       {user && <WelcomePopup />}
+      <PWAInstallPrompt />
     </>
   );
 }
