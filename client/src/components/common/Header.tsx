@@ -22,23 +22,24 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 const Header = () => {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const [location] = useLocation();
   const [, setLocation] = useLocation();
 
-  const handleLogout = async () => {
-    // TODO: Add error handling
-    try {
-      await fetchWithAuth("/api/logout", { method: "POST" });
-      // Redirect to login page after logout
-      setLocation("/auth?mode=login");
-      // Optionally force a full page reload if state isn't clearing properly
-      // window.location.href = "/auth?mode=login";
-    } catch (error) {
-      console.error("Logout failed:", error);
-      // Handle logout error (e.g., show a notification)
-    }
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        setLocation("/auth?mode=login");
+        // Optionally force a full page reload if state isn't clearing properly
+        // window.location.href = "/auth?mode=login";
+      },
+      onError: (error) => {
+        console.error("Logout failed:", error);
+        // Handle logout error (e.g., show a notification)
+      },
+    });
   };
+
 
   return (
     <header className="bg-white border-b sticky top-0 z-50">
